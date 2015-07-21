@@ -31,14 +31,4 @@ public class DecoratedFragment extends Fragment {
     public void onStop() {
         super.onStop();
     }
-
-
-
-    public static class Decorators{
-
-    }
-
-    public static class Decorator{
-
-    }
 }
