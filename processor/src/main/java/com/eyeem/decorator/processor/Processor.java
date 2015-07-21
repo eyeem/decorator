@@ -59,15 +59,14 @@ public class Processor extends AbstractProcessor {
                 klazz = map.get(fullName);
                 if (klazz == null) {
                     klazz = new DecoratedClassDefinition();
-                    klazz.typeElement = typeElement;
+                    klazz.classElement = typeElement;
                     klazz.packageElement = packageElement;
                     map.put(fullName, klazz);
                     numberOfClasses++;
                     log("Adding class: " + fullName);
                 }
-                methodName = methodElement.getSimpleName().toString();
-                log("Adding method: " + methodName);
-                klazz.decoratedMethods.add(methodName);
+                log("Adding method: " + methodElement.getSimpleName().toString());
+                klazz.decoratedMethods.add(methodElement);
                 numberOfMethods++;
             }
         }
@@ -75,8 +74,13 @@ public class Processor extends AbstractProcessor {
         log("Found total of " + numberOfClasses + " classes, with total of " + numberOfMethods + " annotated methods");
         //endregion
 
+
+        //region Generate the classes from the annotated map
         // TODO: classes generation
-        // for(DecoratedClassDefinition d:map) createClass(d, file);
+        for (DecoratedClassDefinition d : map.values()) {
+            log("Generating code for " + d.classElement.getQualifiedName());
+        }
+        //endregion
 
         MethodSpec main = MethodSpec.methodBuilder("main")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -85,7 +89,7 @@ public class Processor extends AbstractProcessor {
                 .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
                 .build();
 
-        TypeSpec helloWorld = TypeSpec.classBuilder("DecoratedFragment__Decorators")
+        TypeSpec helloWorld = TypeSpec.classBuilder("DecoratedFragment$$Decorators")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(main)
                 .build();
@@ -94,7 +98,7 @@ public class Processor extends AbstractProcessor {
                 .build();
 
         try {
-            JavaFileObject file = processingEnv.getFiler().createSourceFile("com.eyeem.decorator.sample.DecoratedFragment__Decorators");
+            JavaFileObject file = processingEnv.getFiler().createSourceFile("com.eyeem.decorator.sample.DecoratedFragment$$Decorators");
             Writer writer = file.openWriter();
             javaFile.writeTo(writer);
             writer.close();

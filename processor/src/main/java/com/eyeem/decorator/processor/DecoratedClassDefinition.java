@@ -2,6 +2,7 @@ package com.eyeem.decorator.processor;
 
 import java.util.ArrayList;
 
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
@@ -10,6 +11,6 @@ import javax.lang.model.element.TypeElement;
  */
 public class DecoratedClassDefinition {
     PackageElement packageElement;
-    TypeElement typeElement; // class type
-    ArrayList<String> decoratedMethods = new ArrayList<>();
+    TypeElement classElement; // class type
+    ArrayList<ExecutableElement> decoratedMethods = new ArrayList<>();
 }

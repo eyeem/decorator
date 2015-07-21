@@ -33,4 +33,12 @@ public class DecoratedFragment extends Fragment {
     }
 
 
+
+    public static class Decorators{
+
+    }
+
+    public static class Decorator{
+
+    }
 }
