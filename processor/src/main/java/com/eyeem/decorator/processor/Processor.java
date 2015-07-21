@@ -6,7 +6,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -16,7 +15,10 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -28,30 +30,53 @@ import javax.tools.JavaFileObject;
 @SupportedAnnotationTypes("com.eyeem.decorator.annotation.Decorate")
 public class Processor extends AbstractProcessor {
 
-    private HashMap<String, ArrayList<String>> map = new HashMap<>();
+    private HashMap<String, DecoratedClassDefinition> map = new HashMap<>();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
+        String fullName;
+        String methodName;
+        DecoratedClassDefinition klazz;
+        int numberOfMethods = 0;
+        int numberOfClasses = 0;
+
+        //region Identify all the annotated classes we should built for ============================
         for (TypeElement annotation : annotations) {
 
-            // returns the annotation
-            log("Annotation @" + annotation.getQualifiedName() + " ________________________");
+            log("Processing annotation: " + annotation.getQualifiedName());
 
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                log("element: " + element.getSimpleName());
 
-                int iteration = 0;
-                Element enclosing = element.getEnclosingElement();
-                while (enclosing != null) {
-                    log("enclosing " + iteration + ": " + enclosing.getSimpleName() + "; kind: " + enclosing.getKind().toString());
-                    enclosing = enclosing.getEnclosingElement();
-                    iteration++;
-                    if (iteration > 20) throw new RuntimeException("WTF DUDE ????");
+                //log("element: " + element.getKind().toString() + "; " + element.getClass().getCanonicalName());
+
+                ExecutableElement methodElement = getMethod(element);
+                PackageElement packageElement = getPackage(element);
+                TypeElement typeElement = getClass(element);
+
+                fullName = typeElement.getQualifiedName().toString();
+
+                klazz = map.get(fullName);
+                if (klazz == null) {
+                    klazz = new DecoratedClassDefinition();
+                    klazz.typeElement = typeElement;
+                    klazz.packageElement = packageElement;
+                    map.put(fullName, klazz);
+                    numberOfClasses++;
+                    log("Adding class: " + fullName);
                 }
+                methodName = methodElement.getSimpleName().toString();
+                log("Adding method: " + methodName);
+                klazz.decoratedMethods.add(methodName);
+                numberOfMethods++;
             }
-
         }
+
+        log("Found total of " + numberOfClasses + " classes, with total of " + numberOfMethods + " annotated methods");
+        //endregion
+
+        // TODO: classes generation
+        // for(DecoratedClassDefinition d:map) createClass(d, file);
 
         MethodSpec main = MethodSpec.methodBuilder("main")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -60,17 +85,16 @@ public class Processor extends AbstractProcessor {
                 .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
                 .build();
 
-        TypeSpec helloWorld = TypeSpec.classBuilder("Test")
+        TypeSpec helloWorld = TypeSpec.classBuilder("DecoratedFragment__Decorators")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(main)
                 .build();
 
-        JavaFile javaFile = JavaFile.builder("com.eyeem.decorator.processor", helloWorld)
+        JavaFile javaFile = JavaFile.builder("com.eyeem.decorator.sample", helloWorld)
                 .build();
 
-
         try {
-            JavaFileObject file = processingEnv.getFiler().createSourceFile("com.eyeem.decorator.processor.Test");
+            JavaFileObject file = processingEnv.getFiler().createSourceFile("com.eyeem.decorator.sample.DecoratedFragment__Decorators");
             Writer writer = file.openWriter();
             javaFile.writeTo(writer);
             writer.close();
@@ -91,5 +115,24 @@ public class Processor extends AbstractProcessor {
     private void err(String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
     }
+
+    public static PackageElement getPackage(Element type) {
+        while (type.getKind() != ElementKind.PACKAGE) {
+            type = type.getEnclosingElement();
+        }
+        return (PackageElement) type;
+    }
+
+    public static TypeElement getClass(Element type) {
+        while (type.getKind() != ElementKind.CLASS) {
+            type = type.getEnclosingElement();
+        }
+        return (TypeElement) type;
+    }
+
+    public static ExecutableElement getMethod(Element type) {
+        return (ExecutableElement) type;
+    }
+
 
 }
