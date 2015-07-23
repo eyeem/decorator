@@ -104,45 +104,54 @@ public class Processor extends AbstractProcessor {
          .addMethod(main)
          .build();
 
+      // TODO figure out shared methods and instigation methods
+      // TODO generate instigation classes
+      // TODO basic utility methods:
+      //   - Decorator.self()
+
       JavaFile decoratorJavaFile = JavaFile.builder(packageName, decoratorSpec)
          .build();
 
-      try {
-         JavaFileObject file = processingEnv.getFiler().createSourceFile(packageName + "." + classToDecorate + "$$Decorator");
-         Writer writer = file.openWriter();
-         decoratorJavaFile.writeTo(writer);
-         writer.close();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+      writeJavaFile(decoratorJavaFile, packageName, classToDecorate, "Decorator");
 
       // 2. generate Decorators (a container for $$Decorator instances)
       TypeName decoratorsSuperclass = ParameterizedTypeName.get(ClassName.get(ArrayList.class), ClassName.get(packageName, classToDecorate + "$$Decorator"));
 
-      TypeSpec helloWorld = TypeSpec.classBuilder(classToDecorate + "$$Decorators")
+      // TODO basic utility methods:
+      //   - getFirstDecoratorOfType(Class clazz)
+      //   - hasType(Class clazz)
+      // .etc
+      // TODO override appropriate methods from decorated methods and loop through decorators there
+
+      TypeSpec decoratorsSpec = TypeSpec.classBuilder(classToDecorate + "$$Decorators")
          .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
          .superclass(decoratorsSuperclass)
          .addMethod(main)
          .build();
 
-      JavaFile decoratorsJavaFile = JavaFile.builder(packageName, helloWorld)
+      JavaFile decoratorsJavaFile = JavaFile.builder(packageName, decoratorsSpec)
          .build();
 
+      writeJavaFile(decoratorsJavaFile, packageName, classToDecorate, "Decorators");
+
+      // TODO 3. generate "DecoratedFragment$$Decorated"
+      //   - needs decorators field (so that we can bind/unbind) with the instance
+      //   - all decorated methods must get overridden and execute appropriate .decorator methods
+      //   - BindInterface so that we can provide arguments for the @Bind interface.
+
+      return true;
+   }
+
+   void writeJavaFile(JavaFile javaFile, String packageName, String classToDecorate, String component) {
       try {
-         JavaFileObject file = processingEnv.getFiler().createSourceFile(packageName + "." + classToDecorate + "$$Decorators");
+         JavaFileObject file = processingEnv.getFiler().createSourceFile(packageName + "." + classToDecorate + "$$" + component);
          Writer writer = file.openWriter();
-         decoratorsJavaFile.writeTo(writer);
+         javaFile.writeTo(writer);
          writer.close();
       } catch (IOException e) {
          e.printStackTrace();
       }
-
-      // TODO 3. generate Decorators extended class
-
-      //throw new RuntimeException("IS IT ALIVE ????????????");
-      return true;
    }
-
 
    private void log(String message) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
