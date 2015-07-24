@@ -82,75 +82,13 @@ public class Processor extends AbstractProcessor {
 
 
       //region Generate the classes from the annotated map
-      // TODO: classes generation
       for (DecoratedClassDefinition d : map.values()) {
          log("Generating code for " + d.classElement.getQualifiedName());
+         new Generator(processingEnv, d).generate();
       }
       //endregion
 
-      MethodSpec main = MethodSpec.methodBuilder("main")
-         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-         .returns(void.class)
-         .addParameter(String[].class, "args")
-         .addStatement("$T.out.println($S)", System.class, "Hello, JavaPoet!")
-         .build();
-
-      String classToDecorate = "DecoratedFragment"; // FIXME hardcoded
-      String packageName = "com.eyeem.decorator.sample"; // FIXME hardcoded
-
-      // 1. generate Decorator
-      TypeSpec decoratorSpec = TypeSpec.classBuilder(classToDecorate + "$$Decorator")
-         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         .addMethod(main)
-         .build();
-
-      // TODO figure out shared methods and instigation methods
-      // TODO generate instigation classes
-      // TODO basic utility methods:
-      //   - Decorator.self()
-
-      JavaFile decoratorJavaFile = JavaFile.builder(packageName, decoratorSpec)
-         .build();
-
-      writeJavaFile(decoratorJavaFile, packageName, classToDecorate, "Decorator");
-
-      // 2. generate Decorators (a container for $$Decorator instances)
-      TypeName decoratorsSuperclass = ParameterizedTypeName.get(ClassName.get(ArrayList.class), ClassName.get(packageName, classToDecorate + "$$Decorator"));
-
-      // TODO basic utility methods:
-      //   - getFirstDecoratorOfType(Class clazz)
-      //   - hasType(Class clazz)
-      // .etc
-      // TODO override appropriate methods from decorated methods and loop through decorators there
-
-      TypeSpec decoratorsSpec = TypeSpec.classBuilder(classToDecorate + "$$Decorators")
-         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         .superclass(decoratorsSuperclass)
-         .addMethod(main)
-         .build();
-
-      JavaFile decoratorsJavaFile = JavaFile.builder(packageName, decoratorsSpec)
-         .build();
-
-      writeJavaFile(decoratorsJavaFile, packageName, classToDecorate, "Decorators");
-
-      // TODO 3. generate "DecoratedFragment$$Decorated"
-      //   - needs decorators field (so that we can bind/unbind) with the instance
-      //   - all decorated methods must get overridden and execute appropriate .decorator methods
-      //   - BindInterface so that we can provide arguments for the @Bind interface.
-
       return true;
-   }
-
-   void writeJavaFile(JavaFile javaFile, String packageName, String classToDecorate, String component) {
-      try {
-         JavaFileObject file = processingEnv.getFiler().createSourceFile(packageName + "." + classToDecorate + "$$" + component);
-         Writer writer = file.openWriter();
-         javaFile.writeTo(writer);
-         writer.close();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
    }
 
    private void log(String message) {

@@ -10,23 +10,15 @@ import javax.lang.model.element.TypeElement;
  * Created by budius on 21.07.15.
  */
 public class DecoratedClassDefinition {
-    PackageElement packageElement;
-    TypeElement classElement;
-    ArrayList<ExecutableElement> decoratedMethods = new ArrayList<>();
+   PackageElement packageElement;
+   TypeElement classElement;
+   ArrayList<ExecutableElement> decoratedMethods = new ArrayList<>();
 
-    String getSourceFileName() {
-        return classElement.getQualifiedName() + "$$Decorator";
-    }
+   String getPackageName() {
+      return String.valueOf(packageElement.getQualifiedName());
+   }
 
-    String getClassName() {
-        return classElement.getSimpleName() + "$$Decorator";
-    }
-
-    String getListSourceFileName() {
-        return classElement.getQualifiedName() + "$$Decorators";
-    }
-
-    String getListClassName() {
-        return classElement.getSimpleName() + "$$Decorators";
-    }
+   String getSimpleClassName() {
+      return String.valueOf(classElement.getSimpleName());
+   }
 }
