@@ -34,88 +34,27 @@ import javax.tools.JavaFileObject;
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("com.eyeem.decorator.annotation.Decorate")
-public class Processor extends AbstractProcessor {
-
-   private HashMap<String, DecoratedClassDefinition> map = new HashMap<>();
+public class Processor extends AbstractProcessor implements Log {
 
    @Override
    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-      String fullName;
-      String methodName;
-      DecoratedClassDefinition klazz;
-      int numberOfMethods = 0;
-      int numberOfClasses = 0;
+      Parser parser = new Parser(this, annotations, roundEnv);
 
-      //region Identify all the annotated classes we should built for ============================
-      for (TypeElement annotation : annotations) {
-
-         log("Processing annotation: " + annotation.getQualifiedName());
-
-         for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-
-            //log("element: " + element.getKind().toString() + "; " + element.getClass().getCanonicalName());
-
-            ExecutableElement methodElement = getMethod(element);
-            PackageElement packageElement = getPackage(element);
-            TypeElement typeElement = getClass(element);
-
-            fullName = typeElement.getQualifiedName().toString();
-
-            klazz = map.get(fullName);
-            if (klazz == null) {
-               klazz = new DecoratedClassDefinition();
-               klazz.classElement = typeElement;
-               klazz.packageElement = packageElement;
-               map.put(fullName, klazz);
-               numberOfClasses++;
-               log("Adding class: " + fullName);
-            }
-            log("Adding method: " + methodElement.getSimpleName().toString());
-            klazz.decoratedMethods.add(methodElement);
-            numberOfMethods++;
-         }
-      }
-
-      log("Found total of " + numberOfClasses + " classes, with total of " + numberOfMethods + " annotated methods");
-      //endregion
-
-
-      //region Generate the classes from the annotated map
-      for (DecoratedClassDefinition d : map.values()) {
-         log("Generating code for " + d.classElement.getQualifiedName());
+      for (DecoratedClassDefinition d : parser.definitions()) {
+         i("Generating code for " + d.classElement.getQualifiedName());
          new Generator(processingEnv, d).generate();
       }
-      //endregion
 
       return true;
    }
 
-   private void log(String message) {
+   @Override public void i(String message) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
    }
 
-   private void err(String message) {
+   @Override public void e(String message) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
    }
-
-   public static PackageElement getPackage(Element type) {
-      while (type.getKind() != ElementKind.PACKAGE) {
-         type = type.getEnclosingElement();
-      }
-      return (PackageElement) type;
-   }
-
-   public static TypeElement getClass(Element type) {
-      while (type.getKind() != ElementKind.CLASS) {
-         type = type.getEnclosingElement();
-      }
-      return (TypeElement) type;
-   }
-
-   public static ExecutableElement getMethod(Element type) {
-      return (ExecutableElement) type;
-   }
-
 
 }
