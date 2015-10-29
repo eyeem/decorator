@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Created by budius on 20.07.15.
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
 public @interface Decorate {
 }
