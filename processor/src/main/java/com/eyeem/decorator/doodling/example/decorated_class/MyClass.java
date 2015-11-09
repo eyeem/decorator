@@ -3,7 +3,6 @@ package com.eyeem.decorator.doodling.example.decorated_class;
 import com.eyeem.decorator.annotation.Decorate;
 import com.eyeem.decorator.doodling.example.decorated_interface.MyInterface;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
