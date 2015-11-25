@@ -2,6 +2,7 @@ package com.eyeem.decorator.processor;
 
 import com.eyeem.decorator.base_classes.AbstractDecorator;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -20,35 +21,47 @@ import static com.eyeem.decorator.processor.GeneratorUtils.*;
 public class GeneratorDecorator implements Generator {
 
    private static final List<Modifier> PUBLIC_ABSTRACT = Arrays.asList(Modifier.PUBLIC, Modifier.ABSTRACT);
-   public static final String ID = "Decorator";
    private final Log log;
 
    public GeneratorDecorator(Log log) {
       this.log = log;
    }
 
-   @Override public void generate(ProcessingEnvironment processingEnv, DecoratorDef def) {
+   /* package */
+   static String getClassName(Data data) {
+      return data.decoratorName;
+   }
+
+   @Override public void generate(ProcessingEnvironment processingEnv, Data def) {
 
       // create class
-      TypeSpec.Builder decoratorClassBuilder = TypeSpec.classBuilder(def.getSimpleClassNameFor(ID))
+      TypeSpec.Builder decoratorClassBuilder = TypeSpec.classBuilder(getClassName(def))
          .superclass(ParameterizedTypeName.get(
             ClassName.get(AbstractDecorator.class),
             TypeName.get(def.generatingClass.getSuperclass())))
-         .addModifiers(Modifier.PUBLIC);
+         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+
+      // add getDecorators()
+      String decoratorsSimpleName = GeneratorDecorators.getClassName(def);
+      MethodSpec.Builder getDecorator = MethodSpec.methodBuilder("getDecorators")
+         .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
+         .returns(ClassName.get(def.getPackageName(), decoratorsSimpleName))
+         .addStatement("return ($L)decorators", decoratorsSimpleName);
+      decoratorClassBuilder.addMethod(getDecorator.build());
 
       // add methods
       addMethodsToClassBuilder(decoratorClassBuilder, def.methods);
 
       // add interfaces
-      for (DecoratorDef.InterfaceDef interfaceDef : def.interfaces) {
+      for (Data.InterfaceData interfaceData : def.interfaces) {
 
          // create interface
          TypeSpec.Builder interfaceBuilder =
-            TypeSpec.interfaceBuilder(interfaceDef._interface.getSimpleName().toString())
+            TypeSpec.interfaceBuilder(interfaceData._interface.getSimpleName().toString())
                .addModifiers(Modifier.PUBLIC);
 
          // add methods
-         addMethodsToInterfaceBuilder(interfaceBuilder, interfaceDef.methods);
+         addMethodsToInterfaceBuilder(interfaceBuilder, interfaceData.methods);
 
          // add to class
          decoratorClassBuilder.addType(interfaceBuilder.build());
@@ -60,13 +73,13 @@ public class GeneratorDecorator implements Generator {
          processingEnv,
          decoratorClassBuilder,
          def.getPackageName(),
-         def.getFullyQualifiedClassNameFor(ID)
+         def.getFullyQualifiedClassNameFor(getClassName(def))
       );
    }
 
-   private static void addMethodsToClassBuilder(TypeSpec.Builder typeBuilder, List<DecoratorDef.MethodDef> methods) {
+   private static void addMethodsToClassBuilder(TypeSpec.Builder typeBuilder, List<Data.MethodData> methods) {
 
-      for (DecoratorDef.MethodDef m : methods) {
+      for (Data.MethodData m : methods) {
 
          // if `void` just create empty method
          if (m.returnsVoid()) {
@@ -89,8 +102,8 @@ public class GeneratorDecorator implements Generator {
       }
    }
 
-   private static void addMethodsToInterfaceBuilder(TypeSpec.Builder typeBuilder, List<DecoratorDef.MethodDef> methods) {
-      for (DecoratorDef.MethodDef m : methods) {
+   private static void addMethodsToInterfaceBuilder(TypeSpec.Builder typeBuilder, List<Data.MethodData> methods) {
+      for (Data.MethodData m : methods) {
          typeBuilder.addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT).build());
       }
    }

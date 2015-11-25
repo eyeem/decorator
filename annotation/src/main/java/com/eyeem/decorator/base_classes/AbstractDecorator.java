@@ -3,11 +3,17 @@ package com.eyeem.decorator.base_classes;
 /**
  * Created by budius on 29.10.15.
  */
-public class AbstractDecorator<T> {
+public class AbstractDecorator<BASE> {
 
-   protected T decorated;
+   protected BASE decorated;
 
-   protected void initDecorator() {/**/}
+   protected AbstractDecorators decorators;
 
-   protected void destroyDecorator() {/**/}
+   protected void bind() {/**/}
+
+   protected void unbind() {/**/}
+
+   protected BASE getDecorated() {
+      return decorated;
+   }
 }

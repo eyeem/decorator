@@ -1,7 +1,4 @@
 apply plugin: 'java'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-}
+apply from: '../gradle-mvn-push.gradle'

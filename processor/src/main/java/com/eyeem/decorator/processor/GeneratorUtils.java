@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import com.sun.istack.internal.Nullable;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -29,7 +28,6 @@ import javax.tools.JavaFileObject;
  * Created by budius on 23.11.15.
  */
 public class GeneratorUtils {
-
 
    public static void writeClass(
       Log log,
@@ -61,8 +59,32 @@ public class GeneratorUtils {
       }
    }
 
-   public static MethodSpec.Builder buildEmptyMethod(DecoratorDef.MethodDef methodDef, Iterable<Modifier> modifiers) {
-      ExecutableElement method = methodDef._method;
+   public static MethodSpec.Builder buildEmptyConstructor(ExecutableElement method) {
+      return buildEmptyMethod(method, null, true);
+   }
+
+   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData, Iterable<Modifier> modifiers) {
+      return buildEmptyMethod(methodData._method, modifiers, false);
+   }
+
+   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData) {
+      return buildEmptyMethod(methodData._method, null, false);
+   }
+
+   /**
+    * Most of this method is a copy from JavaPoet {@link MethodSpec#overriding(ExecutableElement)}.
+    * I've just added a few parameters to control modifiers and use for constructors
+    *
+    * @param method
+    * @param modifiers
+    * @param isConstructor
+    * @return
+    */
+   private static MethodSpec.Builder buildEmptyMethod(ExecutableElement method, Iterable<Modifier> modifiers, boolean isConstructor) {
+
+      if (modifiers == null) {
+         modifiers = getModifiers(method);
+      }
 
       String methodName = method.getSimpleName().toString();
       MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName);
@@ -73,7 +95,12 @@ public class GeneratorUtils {
          methodBuilder.addTypeVariable(TypeVariableName.get(var));
       }
 
-      methodBuilder.returns(TypeName.get(method.getReturnType()));
+      if (!isConstructor) {
+         methodBuilder.returns(TypeName.get(method.getReturnType()));
+      } else {
+         // constructors always must call super
+         methodBuilder.addStatement("super($L)", getCommaSeparatedParams(method, null));
+      }
 
       List<? extends VariableElement> parameters = method.getParameters();
       for (VariableElement parameter : parameters) {
@@ -96,15 +123,8 @@ public class GeneratorUtils {
       return methodBuilder;
    }
 
-   /**
-    * Create empty builder for an empty method based of the given method definition.
-    * Code copied from {@link MethodSpec#overriding(ExecutableElement)} and removed the annotation.
-    *
-    * @param methodDef
-    * @return
-    */
-   public static MethodSpec.Builder buildEmptyMethod(DecoratorDef.MethodDef methodDef) {
-      Set<Modifier> modifiers = methodDef._method.getModifiers();
+   private static Iterable<Modifier> getModifiers(ExecutableElement executableElement) {
+      Set<Modifier> modifiers = executableElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
          || modifiers.contains(Modifier.FINAL)
          || modifiers.contains(Modifier.STATIC)) {
@@ -112,15 +132,18 @@ public class GeneratorUtils {
       }
       modifiers = new LinkedHashSet<>(modifiers);
       modifiers.remove(Modifier.ABSTRACT);
-      return buildEmptyMethod(methodDef, modifiers);
+      return modifiers;
    }
 
-   public static String getInterfaceName(DecoratorDef.MethodDef m) {
+   public static String getInterfaceName(Data.MethodData m) {
       return "Instigate" + Utils.capitalize(m._method.getSimpleName().toString());
    }
 
+   public static String getCommaSeparatedParams(Data.MethodData m, StringBuilder buffer) {
+      return getCommaSeparatedParams(m._method, buffer);
+   }
 
-   public static String getCommaSeparatedParams(DecoratorDef.MethodDef m, @Nullable StringBuilder buffer) {
+   public static String getCommaSeparatedParams(ExecutableElement method, StringBuilder buffer) {
 
       if (buffer == null) {
          buffer = new StringBuilder();
@@ -129,7 +152,7 @@ public class GeneratorUtils {
       }
 
       // build a string with comma separated parameters for this method
-      for (VariableElement variableElement : m._method.getParameters()) {
+      for (VariableElement variableElement : method.getParameters()) {
          if (buffer.length() > 0)
             buffer.append(", ");
          buffer.append(variableElement.getSimpleName());

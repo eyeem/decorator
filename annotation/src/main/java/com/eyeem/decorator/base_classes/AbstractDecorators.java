@@ -8,13 +8,16 @@ import java.util.HashMap;
 /**
  * Created by budius on 13.10.15.
  */
-public abstract class AbstractDecorators<T, V extends AbstractDecorator<T>> {
+public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorator<BASE>> {
 
-   private final HashMap<Class, V> noComposeMap;
-   protected final ArrayList<V> decorators;
+   private final HashMap<Class, DECORATOR> noComposeMap;
+   private final Builder<BASE, DECORATOR> builder;
+   protected final ArrayList<DECORATOR> decorators;
    protected final int size;
 
-   protected AbstractDecorators(Builder<T, V> builder) throws InstantiationException, IllegalAccessException {
+   public AbstractDecorators(Builder<BASE, DECORATOR> builder) throws InstantiationException, IllegalAccessException {
+
+      this.builder = builder.copy();
 
       Class[] nonComposable = getNonComposable();
       noComposeMap = new HashMap<>(nonComposable.length);
@@ -23,14 +26,14 @@ public abstract class AbstractDecorators<T, V extends AbstractDecorator<T>> {
       size = builder.decorators.size();
       decorators = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-         Class<? extends V> klass = builder.decorators.get(i);
-         V v = klass.newInstance();
-         composableCheck(nonComposable, noComposeMap, v);
-         decorators.add(v);
+         Class<? extends DECORATOR> klass = builder.decorators.get(i);
+         DECORATOR decorator = klass.newInstance();
+         composableCheck(nonComposable, decorator);
+         decorators.add(decorator);
       }
    }
 
-   private void composableCheck(Class[] nonComposable, HashMap<Class, V> noComposeMap, V decorator) {
+   private void composableCheck(Class[] nonComposable, DECORATOR decorator) {
       for (int i = 0, size = nonComposable.length; i < size; i++) {
          Class clazz = nonComposable[i];
          if (clazz.isAssignableFrom(decorator.getClass())) {
@@ -44,26 +47,40 @@ public abstract class AbstractDecorators<T, V extends AbstractDecorator<T>> {
       }
    }
 
-   public void initDecorator(T t) {
+   public <I> I getFirstDecoratorOfType(Class clazz) {
+      for (DECORATOR decorator : decorators) {
+         if (clazz.isAssignableFrom(decorator.getClass()))
+            return (I) decorator;
+      }
+      return null;
+   }
+
+   public void bind(BASE base) {
       for (int i = 0, size = decorators.size(); i < size; i++) {
-         AbstractDecorator<T> d = decorators.get(i);
-         d.decorated = t;
+         DECORATOR deco = decorators.get(i);
+         deco.decorated = base;
+         deco.decorators = this;
       }
       for (int i = 0, size = decorators.size(); i < size; i++) {
-         AbstractDecorator<T> d = decorators.get(i);
-         d.initDecorator();
+         DECORATOR deco = decorators.get(i);
+         deco.bind();
       }
    }
 
-   public void destroyDecorator() {
+   public void unbind() {
       for (int i = 0, size = decorators.size(); i < size; i++) {
-         AbstractDecorator<T> d = decorators.get(i);
-         d.destroyDecorator();
+         DECORATOR deco = decorators.get(i);
+         deco.unbind();
       }
       for (int i = 0, size = decorators.size(); i < size; i++) {
-         AbstractDecorator<T> d = decorators.get(i);
-         d.decorated = null;
+         DECORATOR deco = decorators.get(i);
+         deco.decorated = null;
+         deco.decorators = null;
       }
+   }
+
+   public Builder<BASE, DECORATOR> buildUpon() {
+      return builder.copy();
    }
 
    protected <I> I getInstigator(Class klass) {
@@ -72,26 +89,39 @@ public abstract class AbstractDecorators<T, V extends AbstractDecorator<T>> {
 
    protected abstract Class[] getNonComposable();
 
-   public static class Builder<T, V extends AbstractDecorator<T>> implements Serializable {
+   public static class Builder<BASE, DECORATOR extends AbstractDecorator<BASE>> implements Serializable {
 
-      private final ArrayList<Class<? extends V>> decorators = new ArrayList<>();
-      private final Class<? extends AbstractDecorators<T, V>> decoratorsClass;
+      private final ArrayList<Class<? extends DECORATOR>> decorators = new ArrayList<>();
+      public final Class<? extends AbstractDecorators<BASE, DECORATOR>> decoratorsClass;
 
-      public Builder(Class<? extends AbstractDecorators<T, V>> decoratorsClass) {
+      public Builder(Class<? extends AbstractDecorators<BASE, DECORATOR>> decoratorsClass) {
          this.decoratorsClass = decoratorsClass;
       }
 
-      public Builder addDecorator(Class<? extends V> klass) {
+      public Builder<BASE, DECORATOR> addDecorator(Class<? extends DECORATOR> klass) {
          decorators.add(klass);
          return this;
       }
 
-      public AbstractDecorators<T, V> build() throws
+      public Builder<BASE, DECORATOR> removeDecorator(Class<? extends DECORATOR> klass) {
+         decorators.remove(klass);
+         return this;
+      }
+
+      public Builder<BASE, DECORATOR> copy() {
+         Builder<BASE, DECORATOR> copy = new Builder<>(decoratorsClass);
+         for (int i = 0, size = decorators.size(); i < size; i++) {
+            copy.decorators.add(decorators.get(i));
+         }
+         return copy;
+      }
+
+      public AbstractDecorators<BASE, DECORATOR> build() throws
          NoSuchMethodException,
          IllegalAccessException,
          InvocationTargetException,
          InstantiationException {
-         return decoratorsClass.getConstructor(Builder.class).newInstance(this);
+         return decoratorsClass.getDeclaredConstructor(Builder.class).newInstance(this);
       }
    }
 }

@@ -22,7 +22,6 @@ import static com.eyeem.decorator.processor.GeneratorUtils.*;
  */
 public class GeneratorDecorators implements Generator {
 
-   public static final String ID = "Decorators";
    private static final List<Modifier> PUBLIC_FINAL = Arrays.asList(Modifier.PUBLIC, Modifier.FINAL);
    private final Log log;
 
@@ -34,22 +33,27 @@ public class GeneratorDecorators implements Generator {
       this.log = log;
    }
 
-   @Override public void generate(ProcessingEnvironment processingEnv, DecoratorDef def) {
+   /* package */
+   static String getClassName(Data data) {
+      return data.decoratorsName;
+   }
+
+   @Override public void generate(ProcessingEnvironment processingEnv, Data def) {
 
       nonComposableList.setLength(0);
-      decoratorSimpleClassName = def.getSimpleClassNameFor(GeneratorDecorator.ID);
+      decoratorSimpleClassName = GeneratorDecorator.getClassName(def);
 
       // create class
-      TypeSpec.Builder decoratorsClassBuilder = TypeSpec.classBuilder(def.getSimpleClassNameFor(ID))
+      TypeSpec.Builder decoratorsClassBuilder = TypeSpec.classBuilder(getClassName(def))
          .superclass(ParameterizedTypeName.get(
             ClassName.get(AbstractDecorators.class),
             TypeName.get(def.generatingClass.getSuperclass()),
             ClassName.get(def.getPackageName(), decoratorSimpleClassName)))
-         .addModifiers(Modifier.PUBLIC);
+         .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
       // create constructor
       MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
-         .addModifiers(Modifier.PROTECTED)
+         .addModifiers(Modifier.PUBLIC)
          .addParameter(ParameterizedTypeName.get(
                ClassName.get(AbstractDecorators.Builder.class),
                TypeName.get(def.generatingClass.getSuperclass()),
@@ -61,7 +65,7 @@ public class GeneratorDecorators implements Generator {
       decoratorsClassBuilder.addMethod(constructor.build());
 
       // add methods from class
-      for (DecoratorDef.MethodDef m : def.methods) {
+      for (Data.MethodData m : def.methods) {
          MethodSpec methodSpec;
          if (m.returnsVoid()) {
             methodSpec = getVoidMethod(m);
@@ -74,25 +78,25 @@ public class GeneratorDecorators implements Generator {
       }
 
       // add methods from interfaces
-      for (DecoratorDef.InterfaceDef interfaceDef : def.interfaces) {
-         if (interfaceDef.isInstigate) {
+      for (Data.InterfaceData interfaceData : def.interfaces) {
+         if (interfaceData.isInstigate) {
             addToNonComposableList(decoratorSimpleClassName + "." +
-               interfaceDef._interface.getSimpleName().toString());
+               interfaceData._interface.getSimpleName().toString());
          }
-         for (DecoratorDef.MethodDef methodDef : interfaceDef.methods) {
+         for (Data.MethodData methodData : interfaceData.methods) {
             MethodSpec methodSpec = null;
 
             // add methods using `getInstigator`
-            if (interfaceDef.isInstigate) {
-               methodSpec = getTypeMethod(methodDef, interfaceDef);
+            if (interfaceData.isInstigate) {
+               methodSpec = getTypeMethod(methodData, interfaceData);
             }
             // add methods using a loop, and return void
-            else if (methodDef.returnsVoid()) {
-               methodSpec = getVoidMethod(methodDef, interfaceDef);
+            else if (methodData.returnsVoid()) {
+               methodSpec = getVoidMethod(methodData, interfaceData);
             }
             // add methods using a loop, and return boolean
             else {
-               methodSpec = getBooleanMethod(methodDef, interfaceDef);
+               methodSpec = getBooleanMethod(methodData, interfaceData);
             }
             decoratorsClassBuilder.addMethod(methodSpec);
          }
@@ -106,22 +110,10 @@ public class GeneratorDecorators implements Generator {
          .build());
 
       decoratorsClassBuilder.addMethod(MethodSpec.methodBuilder("getNonComposable")
-         .addModifiers(Modifier.PROTECTED)
+         .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
          .addAnnotation(Override.class)
          .returns(TypeName.get(Class[].class))
          .addStatement("return NON_COMPOSABLE")
-         .build());
-
-      // add static newBuilder()
-      decoratorsClassBuilder.addMethod(MethodSpec.methodBuilder("newBuilder")
-         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-         .returns(
-            ParameterizedTypeName.get(
-               ClassName.get(AbstractDecorators.Builder.class),
-               TypeName.get(def.generatingClass.getSuperclass()),
-               ClassName.get(def.getPackageName(), decoratorSimpleClassName))
-         )
-         .addStatement("return new Builder<>($L.class)", def.getSimpleClassNameFor(ID))
          .build());
 
       // write it to disk
@@ -130,11 +122,11 @@ public class GeneratorDecorators implements Generator {
          processingEnv,
          decoratorsClassBuilder,
          def.getPackageName(),
-         def.getFullyQualifiedClassNameFor(ID)
+         def.getFullyQualifiedClassNameFor(getClassName(def))
       );
    }
 
-   private MethodSpec getVoidMethod(DecoratorDef.MethodDef m) {
+   private MethodSpec getVoidMethod(Data.MethodData m) {
       CodeBlock.Builder code = CodeBlock.builder()
          .beginControlFlow("for (int i = 0; i < size; i++)");
       code.addStatement(
@@ -145,7 +137,7 @@ public class GeneratorDecorators implements Generator {
       return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
-   private MethodSpec getVoidMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
+   private MethodSpec getVoidMethod(Data.MethodData m, Data.InterfaceData i) {
       buffer.setLength(0);
       buffer
          .append(decoratorSimpleClassName)
@@ -168,7 +160,7 @@ public class GeneratorDecorators implements Generator {
    }
 
 
-   private MethodSpec getBooleanMethod(DecoratorDef.MethodDef m) {
+   private MethodSpec getBooleanMethod(Data.MethodData m) {
       CodeBlock.Builder code = CodeBlock.builder()
          .beginControlFlow("for (int i = 0; i < size; i++)")
          .beginControlFlow(
@@ -182,7 +174,7 @@ public class GeneratorDecorators implements Generator {
       return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
-   private MethodSpec getBooleanMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
+   private MethodSpec getBooleanMethod(Data.MethodData m, Data.InterfaceData i) {
       buffer.setLength(0);
       buffer
          .append(decoratorSimpleClassName)
@@ -207,7 +199,7 @@ public class GeneratorDecorators implements Generator {
       return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
-   private MethodSpec getTypeMethod(DecoratorDef.MethodDef m) {
+   private MethodSpec getTypeMethod(Data.MethodData m) {
 
       buffer.setLength(0);
       buffer.append(decoratorSimpleClassName);
@@ -233,7 +225,7 @@ public class GeneratorDecorators implements Generator {
       return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
-   private MethodSpec getTypeMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
+   private MethodSpec getTypeMethod(Data.MethodData m, Data.InterfaceData i) {
 
       buffer.setLength(0);
       buffer.append(decoratorSimpleClassName);

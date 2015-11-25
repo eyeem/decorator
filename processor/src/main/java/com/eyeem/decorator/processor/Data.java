@@ -16,7 +16,7 @@ import javax.lang.model.type.TypeMirror;
 /**
  * Created by budius on 23.11.15.
  */
-public class DecoratorDef {
+public class Data {
 
    //region header
    /**
@@ -36,22 +36,29 @@ public class DecoratorDef {
     */
    PackageElement generatingClassPackage;
 
+   TypeMirror superClass;
+
    /**
     * Simple name for the super class from `generatingClass`
     */
-   public String superSimpleName;
+   public String superClassSimpleName;
+
+   String decoratorName = null;
+   String decoratorsName = null;
+   String decoratedName = null;
 
    String getPackageName() {
-      return generatingClassPackage.getQualifiedName().toString();
+      String name = generatingClassPackage.getQualifiedName().toString();
+      if (name.endsWith(".blueprint") || name.endsWith(".blueprints")) {
+         name = name.substring(0, name.lastIndexOf(".blueprint"));
+      }
+      return name;
    }
 
-   String getFullyQualifiedClassNameFor(String id) {
-      return getPackageName() + "." + getSimpleClassNameFor(id);
+   String getFullyQualifiedClassNameFor(String className) {
+      return getPackageName() + "." + className;
    }
 
-   String getSimpleClassNameFor(String id) {
-      return superSimpleName + "$$" + id;
-   }
    //endregion
 
    /**
@@ -59,16 +66,16 @@ public class DecoratorDef {
     * - List of methods
     * - List of Interfaces
     */
-   final ArrayList<MethodDef> methods = new ArrayList<>();
+   final ArrayList<MethodData> methods = new ArrayList<>();
 
-   final ArrayList<InterfaceDef> interfaces = new ArrayList<>();
+   final ArrayList<InterfaceData> interfaces = new ArrayList<>();
 
    //region methods
 
    /**
     * Method
     */
-   public static class MethodDef {
+   public static class MethodData {
       final ExecutableElement _method;
       final TypeMirror returnType;
 
@@ -78,7 +85,7 @@ public class DecoratorDef {
        */
       boolean belongsToExplicitInterface = false;
 
-      public MethodDef(ExecutableElement method) {
+      public MethodData(ExecutableElement method) {
          _method = method;
          this.returnType = method.getReturnType();
       }
@@ -102,12 +109,12 @@ public class DecoratorDef {
    /**
     * Interface
     */
-   public static class InterfaceDef {
+   public static class InterfaceData {
       final TypeElement _interface;
-      final ArrayList<MethodDef> methods = new ArrayList<>();
+      final ArrayList<MethodData> methods = new ArrayList<>();
       boolean isInstigate = false;
 
-      public InterfaceDef(TypeElement anInterface) {
+      public InterfaceData(TypeElement anInterface) {
          _interface = anInterface;
       }
    }
@@ -115,13 +122,13 @@ public class DecoratorDef {
    public void log(Log log) {
       log.i("Originating class: " + generatingClass.getQualifiedName().toString());
       log.i(":Methods: " + methods.size());
-      for (MethodDef m : methods) {
+      for (MethodData m : methods) {
          logMethod(log, m, "::");
       }
       log.i(":Interfaces: " + interfaces.size());
-      for (InterfaceDef i : interfaces) {
+      for (InterfaceData i : interfaces) {
          log.i("::" + i._interface.getQualifiedName());
-         for (MethodDef m : i.methods) {
+         for (MethodData m : i.methods) {
             logMethod(log, m, ":::");
          }
       }
@@ -129,7 +136,7 @@ public class DecoratorDef {
    //endregion
 
    //region log
-   private void logMethod(Log log, MethodDef m, String prefix) {
+   private void logMethod(Log log, MethodData m, String prefix) {
 
       // method modifiers
       StringBuilder sb = new StringBuilder();

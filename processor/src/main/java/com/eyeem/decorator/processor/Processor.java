@@ -1,6 +1,5 @@
 package com.eyeem.decorator.processor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,56 +21,57 @@ import javax.tools.Diagnostic;
 @SupportedAnnotationTypes("com.eyeem.decorator.annotation.Decorate")
 public class Processor extends AbstractProcessor implements Log {
 
-   private static final boolean IS_OLD = false;
    private boolean logEnabled = true;
 
-   private static final boolean LOG_PARSER = true;
+   private static final boolean LOG_PARSER = false;
    private static final boolean LOG_PARSER_RESULT = false;
    private static final boolean LOG_GENERATION = false;
-
 
    @Override
    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-      if (IS_OLD) {
-         old_Parser parser = new old_Parser(this, annotations, roundEnv);
+      if (annotations.size() == 0) {
+         return false;
+      }
 
-         for (old_DecoratedClassDefinition d : parser.definitions()) {
-            i("Generating code for " + d.classElement.getQualifiedName());
-            new old_Generator(processingEnv, d).generate();
-         }
-      } else {
+      long initialTime = System.currentTimeMillis();
+      HashMap<String, Data> results;
 
-         logEnabled = LOG_PARSER;
+      logEnabled = LOG_PARSER;
 
-         // parse the annotated classes
-         Parser parser = new Parser(this);
-         parser.parse(annotations, roundEnv);
+      // parse the annotated classes
+      Parser parser = new Parser(this);
+      parser.parse(annotations, roundEnv);
 
-         // collect results
-         HashMap<String, DecoratorDef> results = parser.getResults();
-         // log parsing results (if wanted)
-         logEnabled = LOG_PARSER_RESULT;
-         for (Map.Entry<String, DecoratorDef> entry : results.entrySet()) {
-            entry.getValue().log(this);
-         }
+      // collect results
+      results = parser.getResults();
 
-         // getter generators
-         List<Generator> generators = Arrays.asList(
-            new GeneratorDecorator(this),
-            new GeneratorDecorated(this),
-            new GeneratorDecorators(this)
-         );
+      // log parsing results (if wanted)
+      logEnabled = LOG_PARSER_RESULT;
+      for (Map.Entry<String, Data> entry : results.entrySet()) {
+         entry.getValue().log(this);
+      }
 
-         // loop through generators
-         logEnabled = LOG_GENERATION;
-         for (Map.Entry<String, DecoratorDef> entry : results.entrySet()) {
-            DecoratorDef def = entry.getValue();
-            for (Generator generator : generators) {
-               generator.generate(processingEnv, def);
-            }
+      // getter generators
+      List<Generator> generators = Arrays.asList(
+         new GeneratorDecorator(this),
+         new GeneratorDecorated(this),
+         new GeneratorDecorators(this)
+      );
+
+      // loop through generators
+      logEnabled = LOG_GENERATION;
+      for (Map.Entry<String, Data> entry : results.entrySet()) {
+         Data def = entry.getValue();
+         for (Generator generator : generators) {
+            generator.generate(processingEnv, def);
          }
       }
+
+      long elapsedTime = System.currentTimeMillis() - initialTime;
+
+      logEnabled = true;
+      i("@Decorate processed in " + elapsedTime + "ms");
 
       return true;
    }
