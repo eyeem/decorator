@@ -1,4 +1,4 @@
-package com.eyeem.decorator.pre_classes;
+package com.eyeem.decorator.base_classes;
 
 /**
  * Created by budius on 29.10.15.

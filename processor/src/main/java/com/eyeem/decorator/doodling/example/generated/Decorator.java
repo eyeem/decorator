@@ -1,6 +1,6 @@
 package com.eyeem.decorator.doodling.example.generated;
 
-import com.eyeem.decorator.pre_classes.AbstractDecorator;
+import com.eyeem.decorator.base_classes.AbstractDecorator;
 
 import java.util.List;
 
@@ -26,5 +26,4 @@ public abstract class Decorator extends AbstractDecorator<DecoratedMyClass> {
    public interface InstigateCreateList {
       public List<String> createList(int val1, int val2);
    }
-
 }

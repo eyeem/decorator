@@ -1,4 +1,4 @@
-package com.eyeem.decorator.pre_classes;
+package com.eyeem.decorator.base_classes;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;

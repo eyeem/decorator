@@ -1,6 +1,6 @@
 package com.eyeem.decorator.doodling.example.generated;
 
-import com.eyeem.decorator.pre_classes.AbstractDecorators;
+import com.eyeem.decorator.base_classes.AbstractDecorators;
 
 import java.util.List;
 
@@ -37,7 +37,10 @@ public class Decorators extends AbstractDecorators<DecoratedMyClass> {
 
    public void method3(String val1, int val2) {
       for (int i = 0; i < size; i++) {
-         ((Decorator.ExtraCall) decorators.get(i)).method3(val1, val2);
+         Decorator deco = (Decorator) decorators.get(i);
+         if (deco instanceof Decorator.ExtraCall) {
+            ((Decorator.ExtraCall) deco).method3(val1, val2);
+         }
       }
    }
 
