@@ -7,7 +7,6 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 import static com.eyeem.decorator.processor.Utils.*;
 
@@ -107,8 +106,13 @@ public class Parser {
          if (isMethod(element)) {
             log.i("... adding method " + element.getSimpleName());
             DecoratorDef.MethodDef methodDef = new DecoratorDef.MethodDef(getMethod(element));
-            methodDef.belongsToInterface = true;
+            methodDef.belongsToExplicitInterface = true;
             i.methods.add(methodDef);
+
+            // if any method on this interface returns a value, this interface should be `instigated`
+            if (!methodDef.returnsVoid() && !methodDef.returnsPrimitive()) {
+               i.isInstigate = true;
+            }
          }
       }
       current.interfaces.add(i);

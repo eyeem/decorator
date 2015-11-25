@@ -41,9 +41,12 @@ public class DecoratorDef {
     */
    public String superSimpleName;
 
+   String getPackageName() {
+      return generatingClassPackage.getQualifiedName().toString();
+   }
+
    String getFullyQualifiedClassNameFor(String id) {
-      return generatingClassPackage.getQualifiedName().toString() + "." +
-         getSimpleClassNameFor(id);
+      return getPackageName() + "." + getSimpleClassNameFor(id);
    }
 
    String getSimpleClassNameFor(String id) {
@@ -68,7 +71,12 @@ public class DecoratorDef {
    public static class MethodDef {
       final ExecutableElement _method;
       final TypeMirror returnType;
-      boolean belongsToInterface = false;
+
+      /**
+       * Flags that this method belongs to an interface explicitly declared by the user.
+       * Auto-generated interfaces, such as the ones from methods with return values, will be `false`
+       */
+      boolean belongsToExplicitInterface = false;
 
       public MethodDef(ExecutableElement method) {
          _method = method;
@@ -97,6 +105,7 @@ public class DecoratorDef {
    public static class InterfaceDef {
       final TypeElement _interface;
       final ArrayList<MethodDef> methods = new ArrayList<>();
+      boolean isInstigate = false;
 
       public InterfaceDef(TypeElement anInterface) {
          _interface = anInterface;

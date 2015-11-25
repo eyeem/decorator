@@ -7,28 +7,28 @@ import java.util.List;
 /**
  * Created by budius on 29.10.15.
  */
-public class Decorators extends AbstractDecorators<DecoratedMyClass> {
+public class Decorators extends AbstractDecorators<DecoratedMyClass, Decorator> {
 
-   protected Decorators(Builder<DecoratedMyClass> builder) throws InstantiationException, IllegalAccessException {
+   protected Decorators(Builder<DecoratedMyClass, Decorator> builder) throws InstantiationException, IllegalAccessException {
       super(builder);
    }
 
    //region method callbacks
    public void method1() {
       for (int i = 0; i < size; i++) {
-         ((Decorator) decorators.get(i)).method1();
+         decorators.get(i).method1();
       }
    }
 
    public void method2(String val) {
       for (int i = 0; i < size; i++) {
-         ((Decorator) decorators.get(i)).method2(val);
+         decorators.get(i).method2(val);
       }
    }
 
    public boolean isTrue() {
       for (int i = 0; i < size; i++) {
-         if (((Decorator) decorators.get(i)).isTrue()) {
+         if (decorators.get(i).isTrue()) {
             return true;
          }
       }
@@ -37,7 +37,7 @@ public class Decorators extends AbstractDecorators<DecoratedMyClass> {
 
    public void method3(String val1, int val2) {
       for (int i = 0; i < size; i++) {
-         Decorator deco = (Decorator) decorators.get(i);
+         Decorator deco = decorators.get(i);
          if (deco instanceof Decorator.ExtraCall) {
             ((Decorator.ExtraCall) deco).method3(val1, val2);
          }
@@ -59,12 +59,12 @@ public class Decorators extends AbstractDecorators<DecoratedMyClass> {
       Decorator.InstigateCreateList.class
    };
 
-   public static Builder<DecoratedMyClass> newBuilder() {
-      return new Builder<>(Decorators.class);
-   }
-
    @Override protected Class[] getNonComposable() {
       return NON_COMPOSABLE;
+   }
+
+   public static Builder<DecoratedMyClass, Decorator> newBuilder() {
+      return new Builder<>(Decorators.class);
    }
    //endregion
 }
