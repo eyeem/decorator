@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
 
 import static com.eyeem.decorator.processor.GeneratorUtils.*;
 
@@ -29,8 +28,7 @@ public class GeneratorDecorators implements Generator {
 
    private StringBuilder buffer = new StringBuilder();
    private StringBuilder nonComposableList = new StringBuilder();
-   private ProcessingEnvironment processingEnv;
-   private DecoratorDef def;
+   private String decoratorSimpleClassName;
 
    public GeneratorDecorators(Log log) {
       this.log = log;
@@ -39,15 +37,14 @@ public class GeneratorDecorators implements Generator {
    @Override public void generate(ProcessingEnvironment processingEnv, DecoratorDef def) {
 
       nonComposableList.setLength(0);
-      this.processingEnv = processingEnv;
-      this.def = def;
+      decoratorSimpleClassName = def.getSimpleClassNameFor(GeneratorDecorator.ID);
 
       // create class
       TypeSpec.Builder decoratorsClassBuilder = TypeSpec.classBuilder(def.getSimpleClassNameFor(ID))
          .superclass(ParameterizedTypeName.get(
             ClassName.get(AbstractDecorators.class),
             TypeName.get(def.generatingClass.getSuperclass()),
-            ClassName.get(def.getPackageName(), def.getSimpleClassNameFor(GeneratorDecorator.ID))))
+            ClassName.get(def.getPackageName(), decoratorSimpleClassName)))
          .addModifiers(Modifier.PUBLIC);
 
       // create constructor
@@ -56,7 +53,7 @@ public class GeneratorDecorators implements Generator {
          .addParameter(ParameterizedTypeName.get(
                ClassName.get(AbstractDecorators.Builder.class),
                TypeName.get(def.generatingClass.getSuperclass()),
-               ClassName.get(def.getPackageName(), def.getSimpleClassNameFor(GeneratorDecorator.ID))),
+               ClassName.get(def.getPackageName(), decoratorSimpleClassName)),
             "builder")
          .addException(InstantiationException.class)
          .addException(IllegalAccessException.class)
@@ -64,8 +61,7 @@ public class GeneratorDecorators implements Generator {
       decoratorsClassBuilder.addMethod(constructor.build());
 
       // add methods from class
-      List<DecoratorDef.MethodDef> methods = def.methods;
-      for (DecoratorDef.MethodDef m : methods) {
+      for (DecoratorDef.MethodDef m : def.methods) {
          MethodSpec methodSpec;
          if (m.returnsVoid()) {
             methodSpec = getVoidMethod(m);
@@ -78,20 +74,56 @@ public class GeneratorDecorators implements Generator {
       }
 
       // add methods from interfaces
-      // TODO:
+      for (DecoratorDef.InterfaceDef interfaceDef : def.interfaces) {
+         if (interfaceDef.isInstigate) {
+            addToNonComposableList(decoratorSimpleClassName + "." +
+               interfaceDef._interface.getSimpleName().toString());
+         }
+         for (DecoratorDef.MethodDef methodDef : interfaceDef.methods) {
+            MethodSpec methodSpec = null;
 
-      // add methods from AbstractDecorators (non-composable)
-      FieldSpec NON_COMPOSABLE = FieldSpec
+            // add methods using `getInstigator`
+            if (interfaceDef.isInstigate) {
+               methodSpec = getTypeMethod(methodDef, interfaceDef);
+            }
+            // add methods using a loop, and return void
+            else if (methodDef.returnsVoid()) {
+               methodSpec = getVoidMethod(methodDef, interfaceDef);
+            }
+            // add methods using a loop, and return boolean
+            else {
+               methodSpec = getBooleanMethod(methodDef, interfaceDef);
+            }
+            decoratorsClassBuilder.addMethod(methodSpec);
+         }
+      }
+
+      // add NON_COMPOSABLE
+      decoratorsClassBuilder.addField(FieldSpec
          .builder(Class[].class, "NON_COMPOSABLE")
          .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-         .initializer("")
-         .build();
+         .initializer("{\n$L\n}", nonComposableList.toString())
+         .build());
 
+      decoratorsClassBuilder.addMethod(MethodSpec.methodBuilder("getNonComposable")
+         .addModifiers(Modifier.PROTECTED)
+         .addAnnotation(Override.class)
+         .returns(TypeName.get(Class[].class))
+         .addStatement("return NON_COMPOSABLE")
+         .build());
 
       // add static newBuilder()
-      // TODO:
+      decoratorsClassBuilder.addMethod(MethodSpec.methodBuilder("newBuilder")
+         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+         .returns(
+            ParameterizedTypeName.get(
+               ClassName.get(AbstractDecorators.Builder.class),
+               TypeName.get(def.generatingClass.getSuperclass()),
+               ClassName.get(def.getPackageName(), decoratorSimpleClassName))
+         )
+         .addStatement("return new Builder<>($L.class)", def.getSimpleClassNameFor(ID))
+         .build());
 
-      /**/
       // write it to disk
       writeClass(
          log,
@@ -100,81 +132,151 @@ public class GeneratorDecorators implements Generator {
          def.getPackageName(),
          def.getFullyQualifiedClassNameFor(ID)
       );
-
-      // zero out processing values
-      this.processingEnv = null;
-      this.def = null;
    }
 
    private MethodSpec getVoidMethod(DecoratorDef.MethodDef m) {
-      CodeBlock code = CodeBlock.builder()
-         .beginControlFlow("for (int i = 0; i < size; i++)")
-         .addStatement(
-            "decorators.get(i).$L($L)",
-            m._method.getSimpleName(),
-            getCommaSeparatedParams(m))
-         .endControlFlow()
-         .build();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code).build();
+      CodeBlock.Builder code = CodeBlock.builder()
+         .beginControlFlow("for (int i = 0; i < size; i++)");
+      code.addStatement(
+         "decorators.get(i).$L($L)",
+         m._method.getSimpleName(),
+         getCommaSeparatedParams(m, buffer));
+      code.endControlFlow();
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
+   private MethodSpec getVoidMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
+      buffer.setLength(0);
+      buffer
+         .append(decoratorSimpleClassName)
+         .append(".")
+         .append(i._interface.getSimpleName().toString());
+      String interfaceName = buffer.toString();
+
+      CodeBlock.Builder code = CodeBlock.builder()
+         .beginControlFlow("for (int i = 0; i < size; i++)")
+         .addStatement("$L deco = decorators.get(i)", decoratorSimpleClassName)
+         .beginControlFlow("if (deco instanceof $L)", interfaceName)
+         .addStatement(
+            "(($L) deco).$L($L)",
+            interfaceName,
+            m._method.getSimpleName(),
+            getCommaSeparatedParams(m, buffer))
+         .endControlFlow()
+         .endControlFlow();
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+   }
+
+
    private MethodSpec getBooleanMethod(DecoratorDef.MethodDef m) {
-      CodeBlock code = CodeBlock.builder()
+      CodeBlock.Builder code = CodeBlock.builder()
          .beginControlFlow("for (int i = 0; i < size; i++)")
          .beginControlFlow(
-            "if(decorators.get(i).$L($L))",
+            "if (decorators.get(i).$L($L))",
             m._method.getSimpleName(),
-            getCommaSeparatedParams(m))
+            getCommaSeparatedParams(m, buffer))
          .addStatement("return true")
          .endControlFlow()
          .endControlFlow()
-         .addStatement("return false")
-         .build();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code).build();
+         .addStatement("return false");
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+   }
+
+   private MethodSpec getBooleanMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
+      buffer.setLength(0);
+      buffer
+         .append(decoratorSimpleClassName)
+         .append(".")
+         .append(i._interface.getSimpleName().toString());
+      String interfaceName = buffer.toString();
+
+      CodeBlock.Builder code = CodeBlock.builder()
+         .beginControlFlow("for (int i = 0; i < size; i++)")
+         .addStatement("$L deco = decorators.get(i)", decoratorSimpleClassName)
+         .beginControlFlow("if (deco instanceof $L)", interfaceName)
+         .beginControlFlow(
+            "if ((($L) deco).$L($L))",
+            interfaceName,
+            m._method.getSimpleName(),
+            getCommaSeparatedParams(m, buffer))
+         .addStatement("return true")
+         .endControlFlow()
+         .endControlFlow()
+         .endControlFlow()
+         .addStatement("return false");
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
    private MethodSpec getTypeMethod(DecoratorDef.MethodDef m) {
 
       buffer.setLength(0);
-      buffer.append(def.getSimpleClassNameFor(GeneratorDecorator.ID));
+      buffer.append(decoratorSimpleClassName);
       buffer.append(".");
       buffer.append(getInterfaceName(m));
 
-      String var = buffer.toString();
-      addToNonComposableList(var); // add this interface to our non-composable list
+      String instigatorName = buffer.toString();
+      addToNonComposableList(instigatorName); // add this interface to our non-composable list
       buffer.append(".class");
-      String klazz = buffer.toString();
+      String instigatorClass = buffer.toString();
       String returnType = m.returnsPrimitive() ? "0" : "null";
 
-      CodeBlock code = CodeBlock.builder()
-         .addStatement("$L i = getInstigator($L)", var, klazz)
-         .beginControlFlow("if (i != null)")
+      CodeBlock.Builder code = CodeBlock.builder()
+         .addStatement("$L deco = getInstigator($L)", instigatorName, instigatorClass)
+         .beginControlFlow("if (deco != null)")
          .addStatement(
-            "return i.$L($L)",
+            "return deco.$L($L)",
             m._method.getSimpleName(),
-            getCommaSeparatedParams(m))
+            getCommaSeparatedParams(m, buffer))
          .nextControlFlow("else")
          .addStatement("return $L", returnType)
-         .endControlFlow()
-         .build();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code).build();
+         .endControlFlow();
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
-   private String getCommaSeparatedParams(DecoratorDef.MethodDef m) {
-      buffer.setLength(0);
+   private MethodSpec getTypeMethod(DecoratorDef.MethodDef m, DecoratorDef.InterfaceDef i) {
 
-      // build a string with comma separated parameters for this method
-      for (VariableElement variableElement : m._method.getParameters()) {
-         if (buffer.length() > 0)
-            buffer.append(", ");
-         buffer.append(variableElement.getSimpleName());
+      buffer.setLength(0);
+      buffer.append(decoratorSimpleClassName);
+      buffer.append(".");
+      buffer.append(i._interface.getSimpleName());
+      String interfaceName = buffer.toString();
+      buffer.append(".class");
+      String interfaceClass = buffer.toString();
+
+      CodeBlock.Builder code = CodeBlock.builder()
+         .addStatement("$L deco = getInstigator($L)", interfaceName, interfaceClass)
+         .beginControlFlow("if (deco != null)");
+
+      // invoke method with no return type
+      if (m.returnsVoid()) {
+         code.addStatement("(($L) deco).$L($L)",
+            interfaceName,
+            m._method.getSimpleName(),
+            getCommaSeparatedParams(m, buffer));
       }
-      return buffer.toString();
+      // invoke method with return type
+      else {
+         code.addStatement("return (($L) deco).$L($L)",
+            interfaceName,
+            m._method.getSimpleName(),
+            getCommaSeparatedParams(m, buffer));
+      }
+
+      if (m.returnsVoid()) {
+         code.endControlFlow();
+      } else {
+         String returnType = m.returnsBoolean() ? "false" : m.returnsPrimitive() ? "0" : "null";
+         code.nextControlFlow("else");
+         code.addStatement("return $L", returnType);
+         code.endControlFlow();
+      }
+
+      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
    private void addToNonComposableList(String klazz) {
       if (nonComposableList.length() > 0) {
-         nonComposableList.append(", ");
+         nonComposableList.append(", \n");
       }
       nonComposableList.append(klazz);
       nonComposableList.append(".class");

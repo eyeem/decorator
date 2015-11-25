@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
+import com.sun.istack.internal.Nullable;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -38,9 +39,10 @@ public class GeneratorUtils {
       String fullName) {
 
       TypeSpec typeSpec = typeBuilder.build();
-      JavaFile javaFile = JavaFile.builder(
-         packageName,
-         typeSpec).build();
+      JavaFile javaFile = JavaFile
+         .builder(packageName, typeSpec)
+         .indent("   ")
+         .build();
 
       Writer writer = null;
 
@@ -115,6 +117,24 @@ public class GeneratorUtils {
 
    public static String getInterfaceName(DecoratorDef.MethodDef m) {
       return "Instigate" + Utils.capitalize(m._method.getSimpleName().toString());
+   }
+
+
+   public static String getCommaSeparatedParams(DecoratorDef.MethodDef m, @Nullable StringBuilder buffer) {
+
+      if (buffer == null) {
+         buffer = new StringBuilder();
+      } else {
+         buffer.setLength(0);
+      }
+
+      // build a string with comma separated parameters for this method
+      for (VariableElement variableElement : m._method.getParameters()) {
+         if (buffer.length() > 0)
+            buffer.append(", ");
+         buffer.append(variableElement.getSimpleName());
+      }
+      return buffer.toString();
    }
 
 }

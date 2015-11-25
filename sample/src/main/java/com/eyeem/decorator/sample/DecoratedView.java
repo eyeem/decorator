@@ -51,12 +51,19 @@ public class DecoratedView extends FrameLayout {
    }
 
    @Decorate
-   public interface TestInterface {
+   public interface InstigateSomething {
       public void method1();
 
       public List method2(String val);
 
       public boolean method3(String val);
+   }
+
+   @Decorate
+   public interface ExtraCallbacks {
+      public void doSomethingCool();
+
+      public boolean doSomethingAndTellmeWhy(String val);
    }
 
    @Decorate
