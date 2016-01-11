@@ -103,6 +103,7 @@ public class GeneratorDecorated implements Generator {
       }
 
       // add static class Builder
+
       decoratedClassBuilder.addType(
          TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -115,6 +116,16 @@ public class GeneratorDecorated implements Generator {
             .addMethod(MethodSpec.constructorBuilder()
                .addModifiers(Modifier.PUBLIC)
                .addStatement("super($L.class)", decoratorsClassName).build())
+
+               // add copy method
+            .addMethod(MethodSpec.methodBuilder("copy")
+               .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+               .returns(ClassName.get(def.getPackageName(), className, "Builder"))
+               .addStatement("Builder copy =  new Builder()")
+               .addStatement("copyTo(copy)")
+               .addStatement("return copy")
+               .build())
+
             .build());
 
       decoratedClassBuilder.addMethod(MethodSpec.methodBuilder("getBuilder")

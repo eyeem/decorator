@@ -80,6 +80,7 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
    }
 
    public Builder<BASE, DECORATOR> buildUpon() {
+      // TODO: move to generated Decorator
       return builder.copy();
    }
 
@@ -108,12 +109,18 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
          return this;
       }
 
+      @Deprecated
       public Builder<BASE, DECORATOR> copy() {
+         // TODO: remove this method, only here to keep compatible with buildUpon();
          Builder<BASE, DECORATOR> copy = new Builder<>(decoratorsClass);
+         copyTo(copy);
+         return copy;
+      }
+
+      protected void copyTo(Builder copy) {
          for (int i = 0, size = decorators.size(); i < size; i++) {
             copy.decorators.add(decorators.get(i));
          }
-         return copy;
       }
 
       public AbstractDecorators<BASE, DECORATOR> build() throws
