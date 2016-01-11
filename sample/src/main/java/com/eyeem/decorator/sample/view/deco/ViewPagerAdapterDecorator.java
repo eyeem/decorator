@@ -60,26 +60,26 @@ public class ViewPagerAdapterDecorator extends Deco implements
    public static final AbstractDecorators.Builder[] PAGES = {
 
       // PAGE 0
-      Presenter.builder()
+      new Presenter.Builder()
          .addDecorator(RecyclerViewDecorator.class)
          .addDecorator(RecyclerAdapterDecorator.class)
          .addDecorator(RecyclerClickListenerDecorator.class)
          .addDecorator(RecyclerHeaderDecorator.class),
 
       // PAGE 1
-      Presenter.builder()
+      new Presenter.Builder()
          .addDecorator(RecyclerViewDecorator.class)
          .addDecorator(RecyclerAdapterDecorator.class)
          .addDecorator(RecyclerClickListenerDecorator.class),
 
       // PAGE 2
-      Presenter.builder()
+      new Presenter.Builder()
          .addDecorator(RecyclerViewDecorator.class)
          .addDecorator(RecyclerAdapterDecorator.class)
          .addDecorator(RecyclerClickListenerDecorator.class),
 
       // PAGE 3
-      Presenter.builder()
+      new Presenter.Builder()
          .addDecorator(RecyclerViewDecorator.class)
          .addDecorator(RecyclerAdapterDecorator.class)
          .addDecorator(RecyclerClickListenerDecorator.class),

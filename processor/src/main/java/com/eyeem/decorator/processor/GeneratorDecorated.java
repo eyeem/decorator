@@ -102,25 +102,20 @@ public class GeneratorDecorated implements Generator {
          }
       }
 
-      /*
-
-      public static AbstractDecorators.Builder<AppCompatActivity, AbstractDecoratorAppCompatActivity> builder() {
-               return new AbstractDecorators.Builder<>(Decorators$$AppCompatActivity.class);
-      }
-
-       */
-
-      // add static builder()
-      decoratedClassBuilder.addMethod(MethodSpec.methodBuilder("builder")
-         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-         .returns(
-            ParameterizedTypeName.get(
+      // add static class Builder
+      decoratedClassBuilder.addType(
+         TypeSpec.classBuilder("Builder")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .superclass(ParameterizedTypeName.get(
                ClassName.get(AbstractDecorators.Builder.class),
                TypeName.get(def.generatingClass.getSuperclass()),
-               ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def)))
-         )
-         .addStatement("return new AbstractDecorators.Builder<>($L.class)", decoratorsClassName)
-         .build());
+               ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
+
+               // add constructor
+            .addMethod(MethodSpec.constructorBuilder()
+               .addModifiers(Modifier.PUBLIC)
+               .addStatement("super($L.class)", decoratorsClassName).build())
+            .build());
 
       decoratedClassBuilder.addMethod(MethodSpec.methodBuilder("getBuilder")
          .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

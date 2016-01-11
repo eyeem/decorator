@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.eyeem.decorator.sample.activity.DecoratedActivitySample;
 import com.eyeem.decorator.sample.mortar.DecoratorService;
-import com.eyeem.decorator.sample.view.Presenter;
 import com.eyeem.decorator.sample.view.DecoratedViewSample;
+import com.eyeem.decorator.sample.view.Presenter;
 import com.eyeem.decorator.sample.view.deco.ViewPagerAdapterDecorator;
 import com.eyeem.decorator.sample.view.deco.ViewPagerDecorator;
 import com.eyeem.recyclerviewtools.OnItemClickListener;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                .addDecorator(RecyclerHeaderDecorator.class));*/
 
             // view pager with recycler views
-            DecoratorService.addBuilder(i, Presenter.builder()
+            DecoratorService.addBuilder(i, new Presenter.Builder()
                .addDecorator(ViewPagerDecorator.class)
                .addDecorator(ViewPagerAdapterDecorator.class));
             startActivity(i);
