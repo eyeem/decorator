@@ -109,6 +109,10 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
          return this;
       }
 
+      public boolean contains(Class klass) {
+         return decorators.contains(klass);
+      }
+
       @Deprecated
       public Builder<BASE, DECORATOR> copy() {
          // TODO: remove this method, only here to keep compatible with buildUpon();
