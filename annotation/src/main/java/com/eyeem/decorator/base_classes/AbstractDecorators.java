@@ -100,13 +100,19 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
       }
 
       public Builder<BASE, DECORATOR> addDecorator(Class<? extends DECORATOR> klass) {
-         decorators.add(klass);
+         if (!decorators.contains(klass)) {
+            decorators.add(klass);
+         }
          return this;
       }
 
       public Builder<BASE, DECORATOR> removeDecorator(Class<? extends DECORATOR> klass) {
          decorators.remove(klass);
          return this;
+      }
+
+      public boolean hasDecorator(Class<? extends DECORATOR> klass) {
+         return decorators.contains(klass);
       }
 
       public boolean contains(Class klass) {
