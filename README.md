@@ -31,6 +31,8 @@ Inheritance is a base concept of object oriented programming and a common practi
 
 The idea behind decorators pattern is to decouple responsibilities/features from the base class and never inherit from the base class anymore. If you need to extend a base class you lose.
 
+![screen shot 2016-03-29 at 18 05 25](https://cloud.githubusercontent.com/assets/121164/14114818/e2a95d88-f5d8-11e5-8963-4a8c00df33aa.png)
+
 To make the Decorator pattern work, four classes components are build:
 - __Decorator__ class with empty methods. These methods come from the base class. Decorator acts much like observer on steroids. This is the class you extend in order to add your features.
 - __Decorators__ class with a list/map/array of Decorator that dispatches all the callbacks and optional callbacks to the Decorator list in a for-loop.
