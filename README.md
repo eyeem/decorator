@@ -25,6 +25,8 @@ Flags usually lead to a source code with huge amount of `if` cases with custom b
 
 Inheritance is a base concept of object oriented programming and a common practice of getting things done on Android. You pretty much override everything constantly (View, Application, Activity, Fragment etc.).  Contrary to flags approach, extending class can help you avoid multiple ‘if’ cases but can also turn very quickly into “inheritance hell”.
 
+![screen shot 2016-03-29 at 17 43 46](https://cloud.githubusercontent.com/assets/121164/14114158/43cffbec-f5d6-11e5-8692-6fcd886d0a06.png)
+
 ## Base concepts
 
 The idea behind decorators pattern is to decouple responsibilities/features from the base class and never inherit from the base class anymore. If you need to extend a base class you lose.
