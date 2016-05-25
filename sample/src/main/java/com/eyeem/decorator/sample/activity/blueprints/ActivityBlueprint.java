@@ -5,6 +5,8 @@ import android.support.annotation.LayoutRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -12,6 +14,8 @@ import android.view.View;
 
 import com.eyeem.decorator.annotation.Decorate;
 import com.eyeem.recyclerviewtools.adapter.WrapAdapter;
+
+import java.util.Random;
 
 /**
  * Created by budius on 26.11.15.
@@ -55,7 +59,13 @@ public class ActivityBlueprint extends AppCompatActivity {
    }
 
    public RecyclerView.LayoutManager getLayoutManager() {
-      return null;
+      // that is general a stupid thing to wring,
+      // but it's a good test to see if our generator is properly handling silly cases
+      if (new Random().nextBoolean()) {
+         return new GridLayoutManager(this, new java.util.Random().nextInt(3) + 2);
+      } else {
+         return new LinearLayoutManager(this);
+      }
    }
 
    public interface LoadMore {
