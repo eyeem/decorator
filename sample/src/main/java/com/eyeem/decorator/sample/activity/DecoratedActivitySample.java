@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.eyeem.decorator.sample.R;
@@ -49,13 +48,9 @@ public class DecoratedActivitySample extends AppCompatActivityDecoratored implem
       }
 
       // build layout manager
-      RecyclerView.LayoutManager layoutManager = getDecorators().getLayoutManager();
-      if (layoutManager == null) {
-         layoutManager = new LinearLayoutManager(this);
-      } else {
-         if (layoutManager instanceof GridLayoutManager) {
-            ((GridLayoutManager) layoutManager).setSpanSizeLookup(wrapAdapter.createSpanSizeLookup(((GridLayoutManager) layoutManager).getSpanCount()));
-         }
+      RecyclerView.LayoutManager layoutManager = getLayoutManager();
+      if (layoutManager instanceof GridLayoutManager) {
+         ((GridLayoutManager) layoutManager).setSpanSizeLookup(wrapAdapter.createSpanSizeLookup(((GridLayoutManager) layoutManager).getSpanCount()));
       }
 
       // assemble layout manager and adapter

@@ -12,7 +12,10 @@ targetCompatibility = 1.7
 dependencies {
     //compile project(':annotation')
     compile 'com.eyeem.decorator:annotation:0.0.1-SNAPSHOT'
-    compile 'com.squareup:javapoet:1.4.0'
+    compile 'com.squareup:javapoet:1.7.0'
+// http://mvnrepository.com/artifact/org.jvnet.sorcerer/sorcerer-javac
+    compile group: 'org.jvnet.sorcerer', name: 'sorcerer-javac', version: '0.8'
+
 }
 
 apply from: '../gradle-mvn-push.gradle'
