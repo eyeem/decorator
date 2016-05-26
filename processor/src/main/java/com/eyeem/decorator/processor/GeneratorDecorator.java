@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 
 import static com.eyeem.decorator.processor.GeneratorUtils.*;
 
@@ -59,6 +60,10 @@ public class GeneratorDecorator implements Generator {
          TypeSpec.Builder interfaceBuilder =
             TypeSpec.interfaceBuilder(interfaceData._interface.getSimpleName().toString())
                .addModifiers(Modifier.PUBLIC);
+
+         for (TypeMirror typeMirror : interfaceData._interface.getInterfaces()) {
+            interfaceBuilder.addSuperinterface(TypeName.get(typeMirror));
+         }
 
          // add methods
          addMethodsToInterfaceBuilder(interfaceBuilder, interfaceData.methods);
