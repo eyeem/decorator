@@ -55,6 +55,10 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
       return null;
    }
 
+   public boolean hasDecorator(Class clazz) {
+      return getFirstDecoratorOfType(clazz) != null;
+   }
+
    public void bind(BASE base) {
       for (int i = 0, size = decorators.size(); i < size; i++) {
          DECORATOR deco = decorators.get(i);
