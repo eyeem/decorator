@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.eyeem.decorator.annotation.Decorate;
+import com.eyeem.decorator.sample.R;
 import com.eyeem.recyclerviewtools.adapter.WrapAdapter;
 
 import java.util.Random;
@@ -73,7 +74,7 @@ public class ActivityBlueprint extends AppCompatActivity {
    }
 
    public int getLayoutId() {
-      return 0;
+      return R.layout.screen_layout;
    }
 
    public interface MenuDecorator {

@@ -1,6 +1,7 @@
 package com.eyeem.decorator.processor;
 
 import com.eyeem.decorator.base_classes.AbstractDecorators;
+import com.eyeem.decorator.exception.DecoratorNotFoundException;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -219,9 +220,14 @@ public class GeneratorDecorators implements Generator {
             "return deco.$L($L)",
             m._method.getSimpleName(),
             getCommaSeparatedParams(m, buffer))
-         .nextControlFlow("else")
-         .addStatement("return $L", returnType)
-         .endControlFlow();
+            .nextControlFlow("else");
+
+      if (m.returnsPrimitive()) {
+         code.addStatement("throw new $T()", TypeName.get(DecoratorNotFoundException.class));
+      } else {
+         code.addStatement("return $L", returnType);
+      }
+      code.endControlFlow();
       return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
