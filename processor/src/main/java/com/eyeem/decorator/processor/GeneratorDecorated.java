@@ -1,6 +1,7 @@
 package com.eyeem.decorator.processor;
 
 import com.eyeem.decorator.base_classes.AbstractDecorators;
+import com.eyeem.decorator.exception.DecoratorNotFoundException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -106,8 +107,12 @@ public class GeneratorDecorated implements Generator {
       for (Data.MethodData m : def.methods) {
          if (m.returnsVoid()) {
             decoratedClassBuilder.addMethod(getVoidMethod(m));
+         } else if (m.returnsBoolean()) {
+            decoratedClassBuilder.addMethod(getBooleanMethod(m));
+         } else if (m.returnsPrimitive()) {
+            decoratedClassBuilder.addMethod(getPrimitiveMethod(m));
          } else {
-            decoratedClassBuilder.addMethod(getNonVoidMethod(m));
+            decoratedClassBuilder.addMethod(getTypeMethod(m));
          }
       }
 
@@ -171,13 +176,30 @@ public class GeneratorDecorated implements Generator {
             getCommaSeparatedParams(m, buffer)).build();
    }
 
-   private MethodSpec getNonVoidMethod(Data.MethodData m) {
-      if (m.returnsPrimitive()) {
-         return addOverrideIfNecessary(buildEmptyMethod(m), m)
+   private MethodSpec getBooleanMethod(Data.MethodData m) {
+      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+            .addStatement("return decorators.$L($L)",
+                  m._method.getSimpleName(),
+                  getCommaSeparatedParams(m, buffer)).build();
+   }
+
+   private MethodSpec getPrimitiveMethod(Data.MethodData m) {
+         CodeBlock.Builder code = CodeBlock.builder()
+               .beginControlFlow("try")
             .addStatement("return decorators.$L($L)",
                m._method.getSimpleName(),
-               getCommaSeparatedParams(m, buffer)).build();
-      } else {
+                     getCommaSeparatedParams(m, buffer))
+               .nextControlFlow("catch($T decoratorNotFoundException)", TypeName.get(DecoratorNotFoundException.class))
+               .add("//region user inputed code\n")
+               .add(MethodBodyReader.getMethodBody(processingEnv, m))
+               .add("//endregion\n")
+               .endControlFlow();
+         return addOverrideIfNecessary(buildEmptyMethod(m), m)
+               .addCode(code.build())
+               .build();
+   }
+
+   private MethodSpec getTypeMethod(Data.MethodData m) {
          CodeBlock.Builder code = CodeBlock.builder()
             .addStatement("$T obj = decorators.$L($L)",
                TypeName.get(m._method.getReturnType()),
@@ -194,7 +216,6 @@ public class GeneratorDecorated implements Generator {
             .addCode(code.build())
             .build();
       }
-   }
 
    private MethodSpec.Builder addOverrideIfNecessary(MethodSpec.Builder builder, Data.MethodData methodData) {
       for (AnnotationMirror a : methodData._method.getAnnotationMirrors()) {
@@ -238,22 +259,9 @@ public class GeneratorDecorated implements Generator {
             String className = item.getValue();
             String fullyQualifiedClassName = item.getKey();
 
-            // check the index of where a classname is written
-            // if the index is higher than zero, than it found something
-            int index = val.indexOf(className, 0);
-            while (index >= 0) {
+            String regex = "(?<=^|\\s)(?<!\\.)" + className + "(?=\\b|[<.(])";
+            val = val.replaceAll(regex, fullyQualifiedClassName);
 
-               // if the char before this is a dot,
-               // then the code already got a fully qualified name, and we skip this
-               if (index == 0 || val.charAt(index - 1) != '.') {
-
-                  // rebuild the string adding the fully qualified name before the class name
-                  val = val.substring(0, index) + fullyQualifiedClassName.replace(className, "") + val.substring(index);
-               }
-
-               // find the next
-               index = val.indexOf(className, index + 1);
-            }
          }
          return val;
       }
@@ -294,6 +302,5 @@ public class GeneratorDecorated implements Generator {
          imports.put(fullyQualifiedClassName, className);
          return super.visitImport(node, trees);
       }
-
    }
 }
