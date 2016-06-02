@@ -100,9 +100,9 @@ public class ActivityBlueprint extends AppCompatActivity {
 
    // tests the generation of interface that extends other
    public interface InterfaceExtendOtherTest extends
-      View.OnClickListener,
-      View.OnCreateContextMenuListener,
-      View.OnDragListener {
+         View.OnClickListener,
+         View.OnCreateContextMenuListener,
+         View.OnDragListener {
       public void onMultiClick(View v, int clickCount);
    }
 

@@ -12,7 +12,7 @@ import com.eyeem.recyclerviewtools.adapter.WrapAdapter;
  * Created by budius on 27.11.15.
  */
 public class HeaderType1Instigator extends AppCompatActivityDecorator implements
-   AppCompatActivityDecorator.SetupRecyclerDecorator {
+      AppCompatActivityDecorator.SetupRecyclerDecorator {
 
    View header;
 

@@ -12,7 +12,7 @@ import com.eyeem.recyclerviewtools.adapter.WrapAdapter;
  * Created by budius on 15.12.15.
  */
 public class RecyclerViewDecorator extends Deco implements
-   Deco.InstigateGetLayoutId {
+      Deco.InstigateGetLayoutId {
 
    @Override public int getLayoutId() {
       return R.layout.recycler;

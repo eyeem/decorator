@@ -46,7 +46,7 @@ public class DecoratorService {
       Intent i = a.getIntent();
       if (i != null && i.hasExtra(KEY)) {
          originalBuilder = (AbstractDecorators.Builder<ViewPresenter<View>, Deco>)
-            i.getSerializableExtra(KEY);
+               i.getSerializableExtra(KEY);
          return originalBuilder != null;
       }
       return false;
@@ -74,11 +74,11 @@ public class DecoratorService {
 
          if (decoratorScope == null) {
             decoratorScope = MortarScope.buildChild(getBaseContext())
-               .withService(DecoratorService.SERVICE_NAME, new DecoratorService(builder))
-               .build(scopeName);
+                  .withService(DecoratorService.SERVICE_NAME, new DecoratorService(builder))
+                  .build(scopeName);
          }
          return decoratorScope.hasService(name) ? decoratorScope.getService(name)
-            : super.getSystemService(name);
+               : super.getSystemService(name);
       }
    }
 

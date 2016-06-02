@@ -12,7 +12,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
-import static com.eyeem.decorator.processor.Utils.*;
+import static com.eyeem.decorator.processor.Utils.capitalize;
+import static com.eyeem.decorator.processor.Utils.getPackage;
+import static com.eyeem.decorator.processor.Utils.selectNonEmpty;
 
 /**
  * Created by budius on 26.11.15.

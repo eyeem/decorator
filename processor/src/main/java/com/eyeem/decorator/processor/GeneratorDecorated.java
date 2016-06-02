@@ -57,8 +57,8 @@ public class GeneratorDecorated implements Generator {
 
       // create class
       TypeSpec.Builder decoratedClassBuilder = TypeSpec.classBuilder(className)
-         .superclass(TypeName.get(def.superClass))
-         .addModifiers(Modifier.PUBLIC);
+            .superclass(TypeName.get(def.superClass))
+            .addModifiers(Modifier.PUBLIC);
 
       // create constructors matching super
       for (ExecutableElement element : ElementFilter.constructorsIn(processingEnv.getTypeUtils().asElement(def.superClass).getEnclosedElements())) {
@@ -67,41 +67,41 @@ public class GeneratorDecorated implements Generator {
 
       // add decorators variable
       decoratedClassBuilder.addField(FieldSpec
-         .builder(ClassName.get(
-            def.getPackageName(),
-            decoratorsClassName),
-            "decorators",
-            Modifier.PRIVATE).build());
+            .builder(ClassName.get(
+                  def.getPackageName(),
+                  decoratorsClassName),
+                  "decorators",
+                  Modifier.PRIVATE).build());
 
       // add getDecorators()
       MethodSpec.Builder getDecorator = MethodSpec.methodBuilder("getDecorators")
-         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         .returns(ClassName.get(def.getPackageName(), decoratorsClassName))
-         .addStatement("return ($L)decorators", decoratorsClassName);
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .returns(ClassName.get(def.getPackageName(), decoratorsClassName))
+            .addStatement("return ($L)decorators", decoratorsClassName);
       decoratedClassBuilder.addMethod(getDecorator.build());
 
       // add bind
       decoratedClassBuilder.addMethod(
-         MethodSpec.methodBuilder("bind")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addParameter(ClassName.get(def.getPackageName(), decoratorsClassName, "Builder"), "builder")
-            .addCode(
-               CodeBlock.builder()
-                  .beginControlFlow("try")
-                  .addStatement("decorators = ($L) builder.build()", decoratorsClassName)
-                  .addStatement("decorators.bind(this)")
-                  .nextControlFlow("catch(Exception e)")
-                  .addStatement("e.printStackTrace()")
-                  .endControlFlow()
-                  .build()
-            )
-            .build());
+            MethodSpec.methodBuilder("bind")
+                  .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                  .addParameter(ClassName.get(def.getPackageName(), decoratorsClassName, "Builder"), "builder")
+                  .addCode(
+                        CodeBlock.builder()
+                              .beginControlFlow("try")
+                              .addStatement("decorators = ($L) builder.build()", decoratorsClassName)
+                              .addStatement("decorators.bind(this)")
+                              .nextControlFlow("catch(Exception e)")
+                              .addStatement("e.printStackTrace()")
+                              .endControlFlow()
+                              .build()
+                  )
+                  .build());
 
       // add unbind
       decoratedClassBuilder.addMethod(
-         MethodSpec.methodBuilder("unbind")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addStatement("decorators.unbind()").build());
+            MethodSpec.methodBuilder("unbind")
+                  .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                  .addStatement("decorators.unbind()").build());
 
       // add annotated methods
       for (Data.MethodData m : def.methods) {
@@ -119,50 +119,50 @@ public class GeneratorDecorated implements Generator {
       // add static class Builder
 
       decoratedClassBuilder.addType(
-         TypeSpec.classBuilder("Builder")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-            .superclass(ParameterizedTypeName.get(
-               ClassName.get(AbstractDecorators.Builder.class),
-               TypeName.get(def.generatingClass.getSuperclass()),
-               ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
+            TypeSpec.classBuilder("Builder")
+                  .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                  .superclass(ParameterizedTypeName.get(
+                        ClassName.get(AbstractDecorators.Builder.class),
+                        TypeName.get(def.generatingClass.getSuperclass()),
+                        ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
 
-            // add constructor
-            .addMethod(MethodSpec.constructorBuilder()
-               .addModifiers(Modifier.PUBLIC)
-               .addStatement("super($L.class)", decoratorsClassName).build())
+                  // add constructor
+                  .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("super($L.class)", decoratorsClassName).build())
 
-            // add copy method
-            .addMethod(MethodSpec.methodBuilder("copy")
-               .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-               .returns(ClassName.get(def.getPackageName(), className, "Builder"))
-               .addStatement("Builder copy =  new Builder()")
-               .addStatement("copyTo(copy)")
-               .addStatement("return copy")
-               .build())
+                  // add copy method
+                  .addMethod(MethodSpec.methodBuilder("copy")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .returns(ClassName.get(def.getPackageName(), className, "Builder"))
+                        .addStatement("Builder copy =  new Builder()")
+                        .addStatement("copyTo(copy)")
+                        .addStatement("return copy")
+                        .build())
 
-            .build());
+                  .build());
 
       decoratedClassBuilder.addMethod(MethodSpec.methodBuilder("getBuilder")
-         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-         .addParameter(TypeName.get(Serializable.class), "serialized")
-         .returns(
-            ParameterizedTypeName.get(
-               ClassName.get(AbstractDecorators.Builder.class),
-               TypeName.get(def.generatingClass.getSuperclass()),
-               ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
-         .addStatement(
-            "return (AbstractDecorators.Builder<$L, $L>) serialized",
-            def.generatingClass.getSuperclass().toString(),
-            GeneratorDecorator.getClassName(def))
-         .build());
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(TypeName.get(Serializable.class), "serialized")
+            .returns(
+                  ParameterizedTypeName.get(
+                        ClassName.get(AbstractDecorators.Builder.class),
+                        TypeName.get(def.generatingClass.getSuperclass()),
+                        ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
+            .addStatement(
+                  "return (AbstractDecorators.Builder<$L, $L>) serialized",
+                  def.generatingClass.getSuperclass().toString(),
+                  GeneratorDecorator.getClassName(def))
+            .build());
 
       // write it to disk
       writeClass(
-         log,
-         processingEnv,
-         decoratedClassBuilder,
-         def.getPackageName(),
-         def.getFullyQualifiedClassNameFor(className)
+            log,
+            processingEnv,
+            decoratedClassBuilder,
+            def.getPackageName(),
+            def.getFullyQualifiedClassNameFor(className)
       );
 
       this.processingEnv = null;
@@ -171,9 +171,9 @@ public class GeneratorDecorated implements Generator {
 
    private MethodSpec getVoidMethod(Data.MethodData m) {
       return addOverrideIfNecessary(buildEmptyMethod(m), m)
-         .addStatement("decorators.$L($L)",
-            m._method.getSimpleName(),
-            getCommaSeparatedParams(m, buffer)).build();
+            .addStatement("decorators.$L($L)",
+                  m._method.getSimpleName(),
+                  getCommaSeparatedParams(m, buffer)).build();
    }
 
    private MethodSpec getBooleanMethod(Data.MethodData m) {
@@ -184,27 +184,27 @@ public class GeneratorDecorated implements Generator {
    }
 
    private MethodSpec getPrimitiveMethod(Data.MethodData m) {
-         CodeBlock.Builder code = CodeBlock.builder()
-               .beginControlFlow("try")
+      CodeBlock.Builder code = CodeBlock.builder()
+            .beginControlFlow("try")
             .addStatement("return decorators.$L($L)",
-               m._method.getSimpleName(),
-                     getCommaSeparatedParams(m, buffer))
-               .nextControlFlow("catch($T decoratorNotFoundException)", TypeName.get(DecoratorNotFoundException.class))
-               .add("//region user inputed code\n")
-               .add(MethodBodyReader.getMethodBody(processingEnv, m))
-               .add("//endregion\n")
-               .endControlFlow();
-         return addOverrideIfNecessary(buildEmptyMethod(m), m)
-               .addCode(code.build())
-               .build();
+                  m._method.getSimpleName(),
+                  getCommaSeparatedParams(m, buffer))
+            .nextControlFlow("catch($T decoratorNotFoundException)", TypeName.get(DecoratorNotFoundException.class))
+            .add("//region user inputed code\n")
+            .add(MethodBodyReader.getMethodBody(processingEnv, m))
+            .add("//endregion\n")
+            .endControlFlow();
+      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+            .addCode(code.build())
+            .build();
    }
 
    private MethodSpec getTypeMethod(Data.MethodData m) {
-         CodeBlock.Builder code = CodeBlock.builder()
+      CodeBlock.Builder code = CodeBlock.builder()
             .addStatement("$T obj = decorators.$L($L)",
-               TypeName.get(m._method.getReturnType()),
-               m._method.getSimpleName(),
-               getCommaSeparatedParams(m, buffer))
+                  TypeName.get(m._method.getReturnType()),
+                  m._method.getSimpleName(),
+                  getCommaSeparatedParams(m, buffer))
             .beginControlFlow("if (obj != null)")
             .addStatement("return obj")
             .nextControlFlow("else")
@@ -212,10 +212,10 @@ public class GeneratorDecorated implements Generator {
             .add(MethodBodyReader.getMethodBody(processingEnv, m))
             .add("//endregion\n")
             .endControlFlow();
-         return addOverrideIfNecessary(buildEmptyMethod(m), m)
+      return addOverrideIfNecessary(buildEmptyMethod(m), m)
             .addCode(code.build())
             .build();
-      }
+   }
 
    private MethodSpec.Builder addOverrideIfNecessary(MethodSpec.Builder builder, Data.MethodData methodData) {
       for (AnnotationMirror a : methodData._method.getAnnotationMirrors()) {

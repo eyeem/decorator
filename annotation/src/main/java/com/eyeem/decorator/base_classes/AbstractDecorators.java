@@ -138,10 +138,10 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
       }
 
       public AbstractDecorators<BASE, DECORATOR> build() throws
-         NoSuchMethodException,
-         IllegalAccessException,
-         InvocationTargetException,
-         InstantiationException {
+            NoSuchMethodException,
+            IllegalAccessException,
+            InvocationTargetException,
+            InstantiationException {
          return decoratorsClass.getDeclaredConstructor(Builder.class).newInstance(this);
       }
    }

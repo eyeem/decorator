@@ -11,7 +11,7 @@ import com.eyeem.decorator.sample.view.Deco;
  * Created by budius on 04.01.16.
  */
 public class RecyclerAdapterDecorator extends Deco implements
-   Deco.InstigateGetRecyclerViewAdapter {
+      Deco.InstigateGetRecyclerViewAdapter {
 
    @Override public RecyclerView.Adapter getRecyclerViewAdapter() {
       return new A();
