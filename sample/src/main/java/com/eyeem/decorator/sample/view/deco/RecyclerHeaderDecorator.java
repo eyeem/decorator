@@ -30,7 +30,7 @@ public class RecyclerHeaderDecorator extends Deco implements View.OnClickListene
 
    @Override public void onClick(View v) {
       String hierarchy = MortarScopeDevHelper.scopeHierarchyToString(
-         ((MortarApplication) v.getContext().getApplicationContext()).rootScope);
+            ((MortarApplication) v.getContext().getApplicationContext()).rootScope);
       Log.d("Budius", hierarchy);
    }
 }

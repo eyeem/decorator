@@ -54,9 +54,9 @@ public class Processor extends AbstractProcessor implements Log {
 
       // getter generators
       List<Generator> generators = Arrays.asList(
-         new GeneratorDecorator(this),
-         new GeneratorDecorated(this),
-         new GeneratorDecorators(this)
+            new GeneratorDecorator(this),
+            new GeneratorDecorated(this),
+            new GeneratorDecorators(this)
       );
 
       // loop through generators

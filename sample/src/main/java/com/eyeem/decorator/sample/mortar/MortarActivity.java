@@ -20,12 +20,12 @@ public class MortarActivity extends AppCompatActivity {
 
       if (activityScope == null) {
          activityScope = MortarScope.buildChild(getApplicationContext())
-            .withService(BundleServiceRunner.SERVICE_NAME, new BundleServiceRunner())
-            .withService(DecoratorService.SERVICE_NAME, new DecoratorService(this))
-            .build(SCOPE_NAME);
+               .withService(BundleServiceRunner.SERVICE_NAME, new BundleServiceRunner())
+               .withService(DecoratorService.SERVICE_NAME, new DecoratorService(this))
+               .build(SCOPE_NAME);
       }
       return activityScope.hasService(name) ? activityScope.getService(name)
-         : super.getSystemService(name);
+            : super.getSystemService(name);
    }
 
    @Override protected void onCreate(Bundle savedInstanceState) {

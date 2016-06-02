@@ -10,7 +10,7 @@ import android.widget.TextView;
  * Created by budius on 27.11.15.
  */
 public class AdapterInstigator extends AppCompatActivityDecorator implements
-   AppCompatActivityDecorator.InstigateGetAdapter {
+      AppCompatActivityDecorator.InstigateGetAdapter {
 
    A a;
 

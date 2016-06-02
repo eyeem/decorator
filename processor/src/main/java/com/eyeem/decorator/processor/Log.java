@@ -5,5 +5,6 @@ package com.eyeem.decorator.processor;
  */
 public interface Log {
    public void i(String info);
+
    public void e(String error);
 }

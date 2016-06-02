@@ -14,7 +14,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 
-import static com.eyeem.decorator.processor.GeneratorUtils.*;
+import static com.eyeem.decorator.processor.GeneratorUtils.buildEmptyMethod;
+import static com.eyeem.decorator.processor.GeneratorUtils.getInterfaceName;
+import static com.eyeem.decorator.processor.GeneratorUtils.writeClass;
 
 /**
  * Created by budius on 23.11.15.
@@ -37,17 +39,17 @@ public class GeneratorDecorator implements Generator {
 
       // create class
       TypeSpec.Builder decoratorClassBuilder = TypeSpec.classBuilder(getClassName(def))
-         .superclass(ParameterizedTypeName.get(
-            ClassName.get(AbstractDecorator.class),
-            TypeName.get(def.generatingClass.getSuperclass())))
-         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+            .superclass(ParameterizedTypeName.get(
+                  ClassName.get(AbstractDecorator.class),
+                  TypeName.get(def.generatingClass.getSuperclass())))
+            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
 
       // add getDecorators()
       String decoratorsSimpleName = GeneratorDecorators.getClassName(def);
       MethodSpec.Builder getDecorator = MethodSpec.methodBuilder("getDecorators")
-         .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
-         .returns(ClassName.get(def.getPackageName(), decoratorsSimpleName))
-         .addStatement("return ($L)decorators", decoratorsSimpleName);
+            .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
+            .returns(ClassName.get(def.getPackageName(), decoratorsSimpleName))
+            .addStatement("return ($L)decorators", decoratorsSimpleName);
       decoratorClassBuilder.addMethod(getDecorator.build());
 
       // add methods
@@ -58,8 +60,8 @@ public class GeneratorDecorator implements Generator {
 
          // create interface
          TypeSpec.Builder interfaceBuilder =
-            TypeSpec.interfaceBuilder(interfaceData._interface.getSimpleName().toString())
-               .addModifiers(Modifier.PUBLIC);
+               TypeSpec.interfaceBuilder(interfaceData._interface.getSimpleName().toString())
+                     .addModifiers(Modifier.PUBLIC);
 
          for (TypeMirror typeMirror : interfaceData._interface.getInterfaces()) {
             interfaceBuilder.addSuperinterface(TypeName.get(typeMirror));
@@ -74,11 +76,11 @@ public class GeneratorDecorator implements Generator {
 
       // write it to disk
       writeClass(
-         log,
-         processingEnv,
-         decoratorClassBuilder,
-         def.getPackageName(),
-         def.getFullyQualifiedClassNameFor(getClassName(def))
+            log,
+            processingEnv,
+            decoratorClassBuilder,
+            def.getPackageName(),
+            def.getFullyQualifiedClassNameFor(getClassName(def))
       );
    }
 
@@ -99,10 +101,10 @@ public class GeneratorDecorator implements Generator {
          // if `Object` or primitive create interface for it
          else {
             typeBuilder.addType(
-               TypeSpec.interfaceBuilder(getInterfaceName(m))
-                  .addModifiers(Modifier.PUBLIC)
-                  .addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT).build())
-                  .build());
+                  TypeSpec.interfaceBuilder(getInterfaceName(m))
+                        .addModifiers(Modifier.PUBLIC)
+                        .addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT).build())
+                        .build());
          }
       }
    }

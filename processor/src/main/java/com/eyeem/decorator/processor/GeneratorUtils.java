@@ -30,17 +30,17 @@ import javax.tools.JavaFileObject;
 public class GeneratorUtils {
 
    public static void writeClass(
-      Log log,
-      ProcessingEnvironment processingEnv,
-      TypeSpec.Builder typeBuilder,
-      String packageName,
-      String fullName) {
+         Log log,
+         ProcessingEnvironment processingEnv,
+         TypeSpec.Builder typeBuilder,
+         String packageName,
+         String fullName) {
 
       TypeSpec typeSpec = typeBuilder.build();
       JavaFile javaFile = JavaFile
-         .builder(packageName, typeSpec)
-         .indent("   ")
-         .build();
+            .builder(packageName, typeSpec)
+            .indent("   ")
+            .build();
 
       Writer writer = null;
 
@@ -108,7 +108,7 @@ public class GeneratorUtils {
          String name = parameter.getSimpleName().toString();
          Set<Modifier> parameterModifiers = parameter.getModifiers();
          ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(type, name)
-            .addModifiers(parameterModifiers.toArray(new Modifier[parameterModifiers.size()]));
+               .addModifiers(parameterModifiers.toArray(new Modifier[parameterModifiers.size()]));
          for (AnnotationMirror mirror : parameter.getAnnotationMirrors()) {
             parameterBuilder.addAnnotation(AnnotationSpec.get(mirror));
          }
@@ -126,8 +126,8 @@ public class GeneratorUtils {
    private static Iterable<Modifier> getModifiers(ExecutableElement executableElement) {
       Set<Modifier> modifiers = executableElement.getModifiers();
       if (modifiers.contains(Modifier.PRIVATE)
-         || modifiers.contains(Modifier.FINAL)
-         || modifiers.contains(Modifier.STATIC)) {
+            || modifiers.contains(Modifier.FINAL)
+            || modifiers.contains(Modifier.STATIC)) {
          throw new IllegalArgumentException("cannot override method with modifiers: " + modifiers);
       }
       modifiers = new LinkedHashSet<>(modifiers);

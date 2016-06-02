@@ -27,8 +27,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
    public static final List<String> OPTIONS = Arrays.asList(
-      "Decorated Activity",
-      "Decorated View"
+         "Decorated Activity",
+         "Decorated View"
    );
 
    private RecyclerView recyclerView;
@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
             // view pager with recycler views
             DecoratorService.addBuilder(i, new Presenter.Builder()
-               .addDecorator(ViewPagerDecorator.class)
-               .addDecorator(ViewPagerAdapterDecorator.class));
+                  .addDecorator(ViewPagerDecorator.class)
+                  .addDecorator(ViewPagerAdapterDecorator.class));
             startActivity(i);
             break;
       }

@@ -15,7 +15,7 @@ import com.eyeem.decorator.sample.view.ScreenLayoutFrame;
  * Created by budius on 04.01.16.
  */
 public class ViewPagerAdapterDecorator extends Deco implements
-   Deco.InstigateGetViewPagerAdapter {
+      Deco.InstigateGetViewPagerAdapter {
 
    @Override public PagerAdapter getViewPagerAdapter() {
       return new Adapter();
@@ -59,30 +59,30 @@ public class ViewPagerAdapterDecorator extends Deco implements
    // this could come from the intent
    public static final AbstractDecorators.Builder[] PAGES = {
 
-      // PAGE 0
-      new Presenter.Builder()
-         .addDecorator(RecyclerViewDecorator.class)
-         .addDecorator(RecyclerAdapterDecorator.class)
-         .addDecorator(RecyclerClickListenerDecorator.class)
-         .addDecorator(RecyclerHeaderDecorator.class),
+         // PAGE 0
+         new Presenter.Builder()
+               .addDecorator(RecyclerViewDecorator.class)
+               .addDecorator(RecyclerAdapterDecorator.class)
+               .addDecorator(RecyclerClickListenerDecorator.class)
+               .addDecorator(RecyclerHeaderDecorator.class),
 
-      // PAGE 1
-      new Presenter.Builder()
-         .addDecorator(RecyclerViewDecorator.class)
-         .addDecorator(RecyclerAdapterDecorator.class)
-         .addDecorator(RecyclerClickListenerDecorator.class),
+         // PAGE 1
+         new Presenter.Builder()
+               .addDecorator(RecyclerViewDecorator.class)
+               .addDecorator(RecyclerAdapterDecorator.class)
+               .addDecorator(RecyclerClickListenerDecorator.class),
 
-      // PAGE 2
-      new Presenter.Builder()
-         .addDecorator(RecyclerViewDecorator.class)
-         .addDecorator(RecyclerAdapterDecorator.class)
-         .addDecorator(RecyclerClickListenerDecorator.class),
+         // PAGE 2
+         new Presenter.Builder()
+               .addDecorator(RecyclerViewDecorator.class)
+               .addDecorator(RecyclerAdapterDecorator.class)
+               .addDecorator(RecyclerClickListenerDecorator.class),
 
-      // PAGE 3
-      new Presenter.Builder()
-         .addDecorator(RecyclerViewDecorator.class)
-         .addDecorator(RecyclerAdapterDecorator.class)
-         .addDecorator(RecyclerClickListenerDecorator.class),
+         // PAGE 3
+         new Presenter.Builder()
+               .addDecorator(RecyclerViewDecorator.class)
+               .addDecorator(RecyclerAdapterDecorator.class)
+               .addDecorator(RecyclerClickListenerDecorator.class),
    };
 
 }

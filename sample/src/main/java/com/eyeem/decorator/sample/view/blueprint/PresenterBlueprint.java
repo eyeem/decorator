@@ -14,9 +14,9 @@ import mortar.ViewPresenter;
  * Created by budius on 15.12.15.
  */
 @Decorate(  // any class name can be specified if parameters are passed
-   decorator = "Deco", // abstract class with empty methods
-   decorators = "Decorators", // group of decorator, dispatch the callbacks in loop
-   decoratored = "Presenter" // original class, contains decorators and dispatches callbacks to it
+      decorator = "Deco", // abstract class with empty methods
+      decorators = "Decorators", // group of decorator, dispatch the callbacks in loop
+      decoratored = "Presenter" // original class, contains decorators and dispatches callbacks to it
 )
 public class PresenterBlueprint extends ViewPresenter<View> {
 

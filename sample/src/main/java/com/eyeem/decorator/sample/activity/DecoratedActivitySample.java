@@ -18,10 +18,10 @@ public class DecoratedActivitySample extends AppCompatActivityDecoratored implem
    public static Intent buildIntent(Context context) {
       Intent i = new Intent(context, DecoratedActivitySample.class);
       i.putExtra("builder", new DecoratedActivitySample.Builder()
-         .addDecorator(AdapterInstigator.class)
-         .addDecorator(HeaderType1Instigator.class)
-         .addDecorator(ItemClickListener.class)
-         .addDecorator(LayoutManagerInstigator.class));
+            .addDecorator(AdapterInstigator.class)
+            .addDecorator(HeaderType1Instigator.class)
+            .addDecorator(ItemClickListener.class)
+            .addDecorator(LayoutManagerInstigator.class));
       return i;
    }
 
