@@ -23,12 +23,14 @@ public class Processor extends AbstractProcessor implements Log {
 
    private boolean logEnabled = true;
 
-   private static final boolean LOG_PARSER = false;
-   private static final boolean LOG_PARSER_RESULT = false;
-   private static final boolean LOG_GENERATION = false;
+   private static final boolean LOG_PARSER = true;
+   private static final boolean LOG_PARSER_RESULT = true;
+   private static final boolean LOG_GENERATION = true;
 
    @Override
    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+      i("@Decorate starting for " + annotations.size() + " element");
 
       if (annotations.size() == 0) {
          return false;
