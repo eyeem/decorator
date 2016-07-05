@@ -11,7 +11,7 @@ import com.eyeem.recyclerviewtools.adapter.WrapAdapter;
  * Created by budius on 27.11.15.
  */
 public class ItemClickListener extends AppCompatActivityDecorator implements
-      AppCompatActivityDecorator.SetupRecyclerDecorator, OnItemClickListener {
+      OnItemClickListener {
 
    @Override public void setupRecycler(RecyclerView recyclerView, WrapAdapter wrapAdapter) {
       wrapAdapter.setOnItemClickListener(recyclerView, this);

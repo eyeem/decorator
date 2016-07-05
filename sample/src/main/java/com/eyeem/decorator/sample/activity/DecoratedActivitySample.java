@@ -30,16 +30,13 @@ public class DecoratedActivitySample extends AppCompatActivityDecoratored implem
       super.onCreate(savedInstanceState);
 
       // build view
-      int layoutId = getDecorators().getLayoutId();
-      if (layoutId <= 0) {
-         layoutId = R.layout.recycler;
-      }
+      int layoutId = getLayoutId();
       setContentView(layoutId);
-      getDecorators().onViewCreated(savedInstanceState);
+      onViewCreated(savedInstanceState);
       RecyclerView rv = (RecyclerView) findViewById(R.id.recycler);
 
       // build adapter
-      RecyclerView.Adapter adapter = getDecorators().getAdapter();
+      RecyclerView.Adapter adapter = getAdapter();
       WrapAdapter wrapAdapter;
       if (adapter instanceof WrapAdapter) {
          wrapAdapter = (WrapAdapter) adapter;
@@ -58,17 +55,17 @@ public class DecoratedActivitySample extends AppCompatActivityDecoratored implem
       rv.setAdapter(wrapAdapter);
 
       // extras
-      getDecorators().setupRecycler(rv, wrapAdapter);
+      setupRecycler(rv, wrapAdapter);
       rv.addOnScrollListener(new LoadMoreOnScrollListener(this));
    }
 
    @Override protected void onDestroy() {
-      getDecorators().onViewWillDestroy();
+      onViewWillDestroy();
       super.onDestroy();
       unbind();
    }
 
    @Override public void onLoadMore(RecyclerView recyclerView) {
-      getDecorators().onLoadMore(recyclerView);
+      onLoadMore(recyclerView);
    }
 }

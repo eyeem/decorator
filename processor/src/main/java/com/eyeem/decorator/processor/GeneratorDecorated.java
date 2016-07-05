@@ -117,6 +117,7 @@ public class GeneratorDecorated implements Generator {
       }
 
       // add static class Builder
+      ClassName builderClassName = ClassName.get(def.getPackageName(), className, "Builder");
 
       decoratedClassBuilder.addType(
             TypeSpec.classBuilder("Builder")
@@ -124,36 +125,23 @@ public class GeneratorDecorated implements Generator {
                   .superclass(ParameterizedTypeName.get(
                         ClassName.get(AbstractDecorators.Builder.class),
                         TypeName.get(def.generatingClass.getSuperclass()),
-                        ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
+                        ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def)),
+                        builderClassName))
 
                   // add constructor
                   .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
                         .addStatement("super($L.class)", decoratorsClassName).build())
 
-                  // add copy method
-                  .addMethod(MethodSpec.methodBuilder("copy")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                        .returns(ClassName.get(def.getPackageName(), className, "Builder"))
-                        .addStatement("Builder copy =  new Builder()")
-                        .addStatement("copyTo(copy)")
-                        .addStatement("return copy")
-                        .build())
-
                   .build());
 
       decoratedClassBuilder.addMethod(MethodSpec.methodBuilder("getBuilder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addParameter(TypeName.get(Serializable.class), "serialized")
-            .returns(
-                  ParameterizedTypeName.get(
-                        ClassName.get(AbstractDecorators.Builder.class),
-                        TypeName.get(def.generatingClass.getSuperclass()),
-                        ClassName.get(def.getPackageName(), GeneratorDecorator.getClassName(def))))
+            .returns(builderClassName)
             .addStatement(
-                  "return (AbstractDecorators.Builder<$L, $L>) serialized",
-                  def.generatingClass.getSuperclass().toString(),
-                  GeneratorDecorator.getClassName(def))
+                  "return ($T) serialized",
+                  builderClassName)
             .build());
 
       // write it to disk

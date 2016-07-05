@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             Intent i = new Intent(this, DecoratedViewSample.class);
 
             // direct recycler view
-/*            DecoratorService.addBuilder(i, DecoratedPresenter.builder()
+/*            DecoratorService.addBuilder(i, new Presenter.Builder()
                .addDecorator(RecyclerViewDecorator.class)
                .addDecorator(RecyclerAdapterDecorator.class)
                .addDecorator(RecyclerClickListenerDecorator.class)
