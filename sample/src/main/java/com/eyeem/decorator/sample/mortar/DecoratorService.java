@@ -9,6 +9,7 @@ import android.view.View;
 
 import com.eyeem.decorator.base_classes.AbstractDecorators;
 import com.eyeem.decorator.sample.view.Deco;
+import com.eyeem.decorator.sample.view.Presenter;
 
 import java.lang.ref.WeakReference;
 
@@ -24,18 +25,18 @@ public class DecoratorService {
 
    private static final String KEY = SERVICE_NAME + ".key";
 
-   public static void addBuilder(Intent intent, AbstractDecorators.Builder<ViewPresenter<View>, Deco> builder) {
+   public static void addBuilder(Intent intent, Presenter.Builder builder) {
       intent.putExtra(KEY, builder);
    }
 
-   private AbstractDecorators.Builder<ViewPresenter<View>, Deco> originalBuilder;
+   private Presenter.Builder originalBuilder;
    private WeakReference<Activity> weakActivity;
 
    public DecoratorService(Activity activity) {
       weakActivity = new WeakReference<>(activity);
    }
 
-   DecoratorService(AbstractDecorators.Builder<ViewPresenter<View>, Deco> builder) {
+   DecoratorService(Presenter.Builder builder) {
       originalBuilder = builder;
    }
 
@@ -45,14 +46,14 @@ public class DecoratorService {
       if (a == null) return false;
       Intent i = a.getIntent();
       if (i != null && i.hasExtra(KEY)) {
-         originalBuilder = (AbstractDecorators.Builder<ViewPresenter<View>, Deco>)
+         originalBuilder = (Presenter.Builder)
                i.getSerializableExtra(KEY);
          return originalBuilder != null;
       }
       return false;
    }
 
-   public AbstractDecorators.Builder<ViewPresenter<View>, Deco> getBuilder() {
+   public Presenter.Builder getBuilder() {
       if (lazyInitBuilder()) return originalBuilder.copy();
       else return null;
    }
@@ -61,9 +62,9 @@ public class DecoratorService {
 
       private final String scopeName;
       private MortarScope decoratorScope;
-      private final AbstractDecorators.Builder<ViewPresenter<View>, Deco> builder;
+      private final Presenter.Builder builder;
 
-      public WrapContext(Context base, AbstractDecorators.Builder<ViewPresenter<View>, Deco> builder, String scopeName) {
+      public WrapContext(Context base, Presenter.Builder builder, String scopeName) {
          super(base);
          this.scopeName = scopeName;
          this.builder = builder;

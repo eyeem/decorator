@@ -51,16 +51,14 @@ public class ActivityBlueprint extends AppCompatActivity {
       return false;
    }
 
-   public interface SetupRecyclerDecorator {
-      public void setupRecycler(RecyclerView recyclerView, WrapAdapter wrapAdapter);
-   }
+   public void setupRecycler(RecyclerView recyclerView, WrapAdapter wrapAdapter){}
 
    public RecyclerView.Adapter getAdapter() {
       return null;
    }
 
    public RecyclerView.LayoutManager getLayoutManager() {
-      // that is general a stupid thing to wring,
+      // that is general a stupid thing to write,
       // but it's a good test to see if our generator is properly handling silly cases
       if (new Random().nextBoolean()) {
          return new GridLayoutManager(this, new java.util.Random().nextInt(3) + 2);
@@ -74,7 +72,7 @@ public class ActivityBlueprint extends AppCompatActivity {
    }
 
    public int getLayoutId() {
-      return R.layout.screen_layout;
+      return R.layout.recycler;
    }
 
    public interface MenuDecorator {

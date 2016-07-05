@@ -8,25 +8,29 @@ import java.util.HashMap;
 /**
  * Created by budius on 13.10.15.
  */
-public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorator<BASE>> {
+public abstract class AbstractDecorators<
+      BASE, // that is the class we're decorating. e.g. Activity, Fragment or Presenter
+      DECORATOR extends AbstractDecorator<BASE>, // that is the decorator class
+      BUILDER extends AbstractDecorators.Builder<BASE, DECORATOR, ? extends AbstractDecorators.Builder> // that is the generated class that extends builder
+      > {
 
    private final HashMap<Class, DECORATOR> noComposeMap;
-   private final Builder<BASE, DECORATOR> builder;
+   private final BUILDER builder;
    protected final ArrayList<DECORATOR> decorators;
    protected final int size;
 
-   public AbstractDecorators(Builder<BASE, DECORATOR> builder) throws InstantiationException, IllegalAccessException {
+   public AbstractDecorators(BUILDER builder) throws InstantiationException, IllegalAccessException {
 
-      this.builder = builder.copy();
+      this.builder = (BUILDER) builder.copy();
 
       Class[] nonComposable = getNonComposable();
       noComposeMap = new HashMap<>(nonComposable.length);
 
       // builds the decorators
-      size = builder.decorators.size();
+      size = this.builder.decorators.size();
       decorators = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-         Class<? extends DECORATOR> klass = builder.decorators.get(i);
+         Class<? extends DECORATOR> klass = this.builder.decorators.get(i);
          DECORATOR decorator = klass.newInstance();
          composableCheck(nonComposable, decorator);
          decorators.add(decorator);
@@ -83,9 +87,8 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
       }
    }
 
-   public Builder<BASE, DECORATOR> buildUpon() {
-      // TODO: move to generated Decorator
-      return builder.copy();
+   public BUILDER buildUpon() {
+      return (BUILDER) builder.copy();
    }
 
    protected <I> I getInstigator(Class klass) {
@@ -94,25 +97,29 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
 
    protected abstract Class[] getNonComposable();
 
-   public static class Builder<BASE, DECORATOR extends AbstractDecorator<BASE>> implements Serializable {
+   public static class Builder<
+         BASE,
+         DECORATOR extends AbstractDecorator<BASE>,
+         BUILDER extends Builder
+         > implements Serializable {
 
-      private final ArrayList<Class<? extends DECORATOR>> decorators = new ArrayList<>();
-      public final Class<? extends AbstractDecorators<BASE, DECORATOR>> decoratorsClass;
+      protected final ArrayList<Class<? extends DECORATOR>> decorators = new ArrayList<>();
+      public final Class<? extends AbstractDecorators> decoratorsClass;
 
-      public Builder(Class<? extends AbstractDecorators<BASE, DECORATOR>> decoratorsClass) {
+      public Builder(Class<? extends AbstractDecorators> decoratorsClass) {
          this.decoratorsClass = decoratorsClass;
       }
 
-      public Builder<BASE, DECORATOR> addDecorator(Class<? extends DECORATOR> klass) {
+      public BUILDER addDecorator(Class<? extends DECORATOR> klass) {
          if (!decorators.contains(klass)) {
             decorators.add(klass);
          }
-         return this;
+         return (BUILDER) this;
       }
 
-      public Builder<BASE, DECORATOR> removeDecorator(Class<? extends DECORATOR> klass) {
+      public BUILDER removeDecorator(Class<? extends DECORATOR> klass) {
          decorators.remove(klass);
-         return this;
+         return (BUILDER) this;
       }
 
       public boolean hasDecorator(Class<? extends DECORATOR> klass) {
@@ -123,26 +130,25 @@ public abstract class AbstractDecorators<BASE, DECORATOR extends AbstractDecorat
          return decorators.contains(klass);
       }
 
-      @Deprecated
-      public Builder<BASE, DECORATOR> copy() {
-         // TODO: remove this method, only here to keep compatible with buildUpon();
-         Builder<BASE, DECORATOR> copy = new Builder<>(decoratorsClass);
-         copyTo(copy);
-         return copy;
-      }
-
-      protected void copyTo(Builder copy) {
-         for (int i = 0, size = decorators.size(); i < size; i++) {
-            copy.decorators.add(decorators.get(i));
+      public BUILDER copy() {
+         try {
+            BUILDER b = ((Class<BUILDER>) getClass()).getConstructor().newInstance();
+            for (int i = 0, size = decorators.size(); i < size; i++) {
+               b.decorators.add(decorators.get(i));
+            }
+            return b;
+         } catch (Exception e) {
+            e.printStackTrace();
+            return null;
          }
       }
 
-      public AbstractDecorators<BASE, DECORATOR> build() throws
+      public AbstractDecorators build() throws
             NoSuchMethodException,
             IllegalAccessException,
             InvocationTargetException,
             InstantiationException {
-         return decoratorsClass.getDeclaredConstructor(Builder.class).newInstance(this);
+         return decoratorsClass.getDeclaredConstructor(getClass()).newInstance(this);
       }
    }
 }

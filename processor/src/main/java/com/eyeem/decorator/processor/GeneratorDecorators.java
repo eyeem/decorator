@@ -52,16 +52,15 @@ public class GeneratorDecorators implements Generator {
             .superclass(ParameterizedTypeName.get(
                   ClassName.get(AbstractDecorators.class),
                   TypeName.get(def.generatingClass.getSuperclass()),
-                  ClassName.get(def.getPackageName(), decoratorSimpleClassName)))
+                  ClassName.get(def.getPackageName(), decoratorSimpleClassName),
+                  ClassName.get(def.getPackageName(), GeneratorDecorated.getClassName(def), "Builder")))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
       // create constructor
       MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterizedTypeName.get(
-                  ClassName.get(AbstractDecorators.Builder.class),
-                  TypeName.get(def.generatingClass.getSuperclass()),
-                  ClassName.get(def.getPackageName(), decoratorSimpleClassName)),
+            .addParameter(
+                  ClassName.get(def.getPackageName(), GeneratorDecorated.getClassName(def), "Builder"),
                   "builder")
             .addException(InstantiationException.class)
             .addException(IllegalAccessException.class)

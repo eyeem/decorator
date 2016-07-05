@@ -57,7 +57,7 @@ public class ViewPagerAdapterDecorator extends Deco implements
    }
 
    // this could come from the intent
-   public static final AbstractDecorators.Builder[] PAGES = {
+   public static final Presenter.Builder[] PAGES = {
 
          // PAGE 0
          new Presenter.Builder()
