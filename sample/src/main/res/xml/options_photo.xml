@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <PreferenceCategory android:title="Photo options">
+
+      <ListPreference
+         android:defaultValue="Popular"
+         android:entries="@array/photo_endpoints"
+         android:entryValues="@array/photo_endpoints"
+         android:key="photo_endpoints"
+         android:summary="Current: %s"
+         android:title="Photo endpoint"/>
+
+      <ListPreference
+         android:defaultValue="Dummy"
+         android:entries="@array/photo_adapter"
+         android:entryValues="@array/photo_adapter"
+         android:key="photo_adapter"
+         android:summary="Current: %s"
+         android:title="Photo Adapter"/>
+
+   </PreferenceCategory>
+
+</PreferenceScreen>

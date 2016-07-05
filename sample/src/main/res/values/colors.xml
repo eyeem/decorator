@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <color name="colorPrimary">#673AB7</color>
+   <color name="colorPrimaryDark">#512DA8</color>
+   <color name="colorAccent">#FF5722</color>
+
+   <color name="colorPrimaryText">#212121</color>
+   <color name="colorSecondaryText">#727272</color>
+   <color name="colorBackground">#FFF</color>
+   <color name="colorCardBackground">#EEE</color>
+   <color name="colorPrimaryTextInverse">#EEE</color>
+</resources>

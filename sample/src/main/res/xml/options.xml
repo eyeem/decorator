@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <PreferenceCategory android:title="Toolbar">
+
+      <SwitchPreference
+         android:defaultValue="false"
+         android:key="toolbar_enabled"
+         android:summary="Show toolbar"
+         android:title="Toolbar enabled"/>
+
+      <ListPreference
+         android:defaultValue="Hello World"
+         android:dependency="toolbar_enabled"
+         android:entries="@array/toolbar_title"
+         android:entryValues="@array/toolbar_title"
+         android:key="toolbar_title"
+         android:summary="Current: %s"
+         android:title="Toolbar title"/>
+   </PreferenceCategory>
+
+   <PreferenceCategory
+      android:dependency="toolbar_enabled"
+      android:title="Layout">
+
+      <SwitchPreference
+         android:defaultValue="false"
+         android:key="coordinator_layout"
+         android:summary="Use coordinator layout"
+         android:title="Coordinator Layout"/>
+
+      <SwitchPreference
+         android:defaultValue="false"
+         android:dependency="coordinator_layout"
+         android:key="coordinator_header"
+         android:summary="Add header in Coordinator layout"
+         android:title="Header"/>
+   </PreferenceCategory>
+
+   <PreferenceCategory android:title="Data and Recycler">
+      <ListPreference
+         android:defaultValue="Photo"
+         android:entries="@array/data_types"
+         android:entryValues="@array/data_types"
+         android:key="data_type"
+         android:summary="Current: %s"
+         android:title="Data type"/>
+
+      <ListPreference
+         android:defaultValue="Linear"
+         android:entries="@array/recyclerview_layout"
+         android:entryValues="@array/recyclerview_layout"
+         android:key="recyclerview_layout"
+         android:summary="Current: %s"
+         android:title="Layout Manager"/>
+
+   </PreferenceCategory>
+
+   <PreferenceCategory android:title="others">
+      <SwitchPreference
+         android:defaultValue="false"
+         android:key="load_more"
+         android:summary="Load more content on scroll"
+         android:title="Load more"/>
+
+      <SwitchPreference
+         android:defaultValue="false"
+         android:key="swipe_to_refresh"
+         android:summary="Enable Swipe to refresh action"
+         android:title="Swipe to refresh"/>
+   </PreferenceCategory>
+
+</PreferenceScreen>

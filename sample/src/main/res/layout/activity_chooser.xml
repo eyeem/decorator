@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:animateLayoutChanges="true"
+   android:orientation="vertical"
+   tools:context="com.eyeem.decorator.sample.ChooserActivity">
+
+   <!--   <fragment
+         android:id="@+id/prefs_fragment"
+         android:name="com.eyeem.decorator.sample.ChooserActivity$Prefs"
+         android:layout_width="match_parent"
+         android:layout_height="0dp"
+         android:layout_weight="1"
+         android:tag="ChooserActivityPrefs"/>-->
+
+   <ListView
+      android:id="@android:id/list"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"/>
+
+   <Button
+      android:id="@+id/go"
+      android:layout_width="match_parent"
+      android:layout_height="72dp"
+      android:background="?attr/colorAccent"
+      android:fontFamily="sans-serif"
+      android:text="Go"
+      android:textColor="?android:textColorPrimaryInverse"
+      android:textSize="22sp"/>
+
+</LinearLayout>
