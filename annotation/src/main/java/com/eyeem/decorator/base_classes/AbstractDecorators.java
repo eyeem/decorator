@@ -106,6 +106,19 @@ public abstract class AbstractDecorators<
       protected final ArrayList<Class<? extends DECORATOR>> decorators = new ArrayList<>();
       public final Class<? extends AbstractDecorators> decoratorsClass;
 
+      /**
+       * For debugging usages
+       *
+       * @return array of all the decorators currently in use
+       */
+      public String[] getDecorators() {
+         String[] d = new String[decorators.size()];
+         for (int i = 0, size = d.length; i < size; i++) {
+            d[i] = decorators.get(i).getSimpleName();
+         }
+         return d;
+      }
+
       public Builder(Class<? extends AbstractDecorators> decoratorsClass) {
          this.decoratorsClass = decoratorsClass;
       }

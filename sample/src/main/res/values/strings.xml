@@ -1,4 +1,52 @@
 <resources>
-   <item name="content" type="id"/>
-   <string name="app_name">Decorator</string>
+   <string name="app_name">Decorators</string>
+
+   <array name="data_types">
+      <item>Photo</item>
+      <item>User</item>
+   </array>
+
+   <array name="toolbar_title">
+      <item>Hello World</item>
+      <item>Item Count</item>
+   </array>
+
+   <array name="recyclerview_adapter">
+      <item>Dummy</item>
+      <item>List</item>
+      <item>Grid</item>
+      <item>Staggered</item>
+   </array>
+
+   <array name="recyclerview_layout">
+      <item>Linear</item>
+      <item>Grid</item>
+      <item>Staggered</item>
+   </array>
+
+   <array name="photo_endpoints">
+      <item>Popular</item>
+      <item>From User</item>
+      <item>From Album</item>
+   </array>
+
+   <array name="photo_adapter">
+      <item>Dummy</item>
+      <item>Grid</item>
+      <item>Card</item>
+   </array>
+
+   <array name="user_endpoints">
+      <item>Linear</item>
+      <item>Grid</item>
+      <item>Staggered</item>
+   </array>
+
+   <array name="user_adapter">
+      <item>Linear</item>
+      <item>Grid</item>
+      <item>Staggered</item>
+   </array>
+
+
 </resources>

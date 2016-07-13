@@ -1,0 +1,4 @@
+<resources>
+   <item name="content" type="id"/>
+   <string name="app_name">Decorator</string>
+</resources>
