@@ -6,12 +6,14 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
 import static com.eyeem.decorator.processor.GeneratorUtils.buildEmptyMethod;
@@ -63,8 +65,14 @@ public class GeneratorDecorator implements Generator {
                TypeSpec.interfaceBuilder(interfaceData._interface.getSimpleName().toString())
                      .addModifiers(Modifier.PUBLIC);
 
+         // add `extends` from other interfaces
          for (TypeMirror typeMirror : interfaceData._interface.getInterfaces()) {
             interfaceBuilder.addSuperinterface(TypeName.get(typeMirror));
+         }
+
+         // add generic
+         for (TypeParameterElement generic : interfaceData._interface.getTypeParameters()) {
+            interfaceBuilder.addTypeVariable(TypeVariableName.get(generic));
          }
 
          // add methods

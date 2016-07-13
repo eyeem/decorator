@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
+import com.sun.tools.javac.code.Type;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -20,6 +21,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.tools.JavaFileObject;
@@ -60,15 +62,19 @@ public class GeneratorUtils {
    }
 
    public static MethodSpec.Builder buildEmptyConstructor(ExecutableElement method) {
-      return buildEmptyMethod(method, null, true);
+      return buildEmptyMethod(method, null, true, false);
    }
 
    public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData, Iterable<Modifier> modifiers) {
-      return buildEmptyMethod(methodData._method, modifiers, false);
+      return buildEmptyMethod(methodData._method, modifiers, false, false);
+   }
+
+   public static MethodSpec.Builder buildEmptyMethodWithGenericCasting(Data.MethodData methodData, Iterable<Modifier> modifiers) {
+      return buildEmptyMethod(methodData._method, modifiers, false, true);
    }
 
    public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData) {
-      return buildEmptyMethod(methodData._method, null, false);
+      return buildEmptyMethod(methodData._method, null, false, false);
    }
 
    /**
@@ -80,7 +86,7 @@ public class GeneratorUtils {
     * @param isConstructor
     * @return
     */
-   private static MethodSpec.Builder buildEmptyMethod(ExecutableElement method, Iterable<Modifier> modifiers, boolean isConstructor) {
+   private static MethodSpec.Builder buildEmptyMethod(ExecutableElement method, Iterable<Modifier> modifiers, boolean isConstructor, boolean addGenericCasting) {
 
       if (modifiers == null) {
          modifiers = getModifiers(method);
@@ -93,6 +99,28 @@ public class GeneratorUtils {
       for (TypeParameterElement typeParameterElement : method.getTypeParameters()) {
          TypeVariable var = (TypeVariable) typeParameterElement.asType();
          methodBuilder.addTypeVariable(TypeVariableName.get(var));
+      }
+
+      if (addGenericCasting) {
+
+         // TODO: loop up on `getTypeArguments` to find generic in any possible layer
+         if (method.getReturnType() instanceof Type.ClassType) {
+            for (Type type : ((Type.ClassType) method.getReturnType()).getTypeArguments()) {
+
+               Type.TypeVar typeVar = null;
+               while (typeVar == null) {
+                  for (Type t : type.getTypeArguments()) {
+                     if (t.getKind().equals(TypeKind.TYPEVAR)) {
+                        typeVar = (Type.TypeVar) t;
+                     }
+                  }
+               }
+
+               if (typeVar != null) {
+                  methodBuilder.addTypeVariable(TypeVariableName.get(typeVar));
+               }
+            }
+         }
       }
 
       if (!isConstructor) {
