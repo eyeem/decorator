@@ -17,6 +17,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 
 import static com.eyeem.decorator.processor.GeneratorUtils.buildEmptyMethod;
+import static com.eyeem.decorator.processor.GeneratorUtils.buildEmptyMethodWithGenericCasting;
 import static com.eyeem.decorator.processor.GeneratorUtils.getCommaSeparatedParams;
 import static com.eyeem.decorator.processor.GeneratorUtils.getInterfaceName;
 import static com.eyeem.decorator.processor.GeneratorUtils.writeClass;
@@ -271,7 +272,7 @@ public class GeneratorDecorators implements Generator {
          code.endControlFlow();
       }
 
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethodWithGenericCasting(m, PUBLIC_FINAL).addCode(code.build()).build();
    }
 
    private void addToNonComposableList(String klazz) {
