@@ -35,6 +35,7 @@ public class PhotoCallback implements Callback<PhotoCallback.PhotoResponse> {
 
       if (response.body().photos.offset == 0) {
          list.list.clear();
+         list.lastRefresh = System.currentTimeMillis();
       }
 
       list.list.addAll(response.body().photos.items);

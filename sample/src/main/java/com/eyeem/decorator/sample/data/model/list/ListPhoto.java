@@ -11,5 +11,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class ListPhoto extends RealmObject {
    @PrimaryKey public String id;
+   public long lastRefresh;
    public RealmList<Photo> list;
 }

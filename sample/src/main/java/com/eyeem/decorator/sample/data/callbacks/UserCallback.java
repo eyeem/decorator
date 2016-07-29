@@ -2,6 +2,7 @@ package com.eyeem.decorator.sample.data.callbacks;
 
 import android.util.Log;
 
+import com.eyeem.decorator.sample.data.Creator;
 import com.eyeem.decorator.sample.data.model.User;
 import com.eyeem.decorator.sample.data.model.list.ListUser;
 import com.eyeem.decorator.sample.util.PerformanceLog;
@@ -27,14 +28,12 @@ public class UserCallback implements Callback<UserCallback.UserResponse> {
       PerformanceLog.start("response");
       Realm realm = Realm.getDefaultInstance();
 
-      ListUser list = realm.where(ListUser.class).equalTo("id", id).findFirst();
+      ListUser list = Creator.getListUser(id);
       realm.beginTransaction();
 
-      if (list == null) {
-         list = realm.createObject(ListUser.class);
-         list.id = id;
-      } else if (response.body().users.offset == 0) {
+      if (response.body().users.offset == 0) {
          list.list.clear();
+         list.lastRefresh = System.currentTimeMillis();
       }
 
       list.list.addAll(response.body().users.items);

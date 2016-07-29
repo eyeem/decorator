@@ -2,11 +2,16 @@ package com.eyeem.decorator.sample.decorators;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.eyeem.decorator.sample.Deco;
 import com.eyeem.decorator.sample.KEY;
+import com.eyeem.decorator.sample.R;
+import com.eyeem.decorator.sample.Time;
 import com.eyeem.decorator.sample.data.api.EyeEm;
 import com.eyeem.decorator.sample.data.callbacks.UserCallback;
+import com.eyeem.decorator.sample.data.model.list.ListUser;
 import com.eyeem.decorator.sample.util.PerformanceLog;
 
 import java.util.HashMap;
@@ -27,10 +32,21 @@ public class UserRequestInstigator extends Deco implements Deco.RequestInstigato
    }
 
    @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
-      if (savedInstanceState == null) {
-         url = getDecorated().getIntent().getStringExtra(KEY.URL);
-         PerformanceLog.start(url);
-         EyeEm.get().getUsers(url, 0, QUERY).enqueue(new UserCallback());
+      url = getDecorated().getIntent().getStringExtra(KEY.URL);
+   }
+
+   @Override protected void onStart() {
+      boolean isOnTop = true;
+      RecyclerView rv = ((RecyclerView) getDecorated().findViewById(R.id.recycler));
+      View child = rv.getChildAt(0);
+      if (child != null) {
+         isOnTop = 0 == rv.getChildAdapterPosition(child);
+      }
+      boolean isOld = System.currentTimeMillis() - ((ListUser) getDecorators().getModel()).lastRefresh > 6 * Time.HOUR;
+
+      // refresh if on top of the list and data is old
+      if (isOnTop && isOld) {
+         reload();
       }
    }
 

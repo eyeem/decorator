@@ -11,5 +11,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class ListUser extends RealmObject {
    @PrimaryKey public String id;
+   public long lastRefresh;
    public RealmList<User> list;
 }
