@@ -29,8 +29,7 @@ public class LoadMoreDecorator extends Deco implements LoadMoreOnScrollListener.
    }
 
    @Override protected void onStart() {
-      Deco.RequestInstigator d = getDecorators().getFirstDecoratorOfType(Deco.RequestInstigator.class);
-      loading.setVisibility(EyeEm.requests().isExecuting(d.getRequestId()) ? View.VISIBLE : View.GONE);
+      loading.setVisibility(EyeEm.requests().isExecuting(getDecorators().getRequestId()) ? View.VISIBLE : View.GONE);
    }
 
    @Override protected void onStop() {
@@ -42,10 +41,9 @@ public class LoadMoreDecorator extends Deco implements LoadMoreOnScrollListener.
    }
 
    @Override public void onLoadMore(RecyclerView recyclerView) {
-      Deco.RequestInstigator d = getDecorators().getFirstDecoratorOfType(Deco.RequestInstigator.class);
-      EyeEm.requests().addListener(this, d.getRequestId());
+      EyeEm.requests().addListener(this, getDecorators().getRequestId());
       loading.setVisibility(View.VISIBLE);
-      d.loadMore();
+      getDecorators().loadMore();
    }
 
    @Override public void onRequestFinished(boolean success, int offset) {

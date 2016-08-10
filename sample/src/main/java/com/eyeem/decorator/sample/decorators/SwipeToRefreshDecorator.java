@@ -13,16 +13,17 @@ import com.eyeem.decorator.sample.data.api.RequestObservableList;
 public class SwipeToRefreshDecorator extends Deco implements SwipeRefreshLayout.OnRefreshListener, RequestObservableList.Listener {
 
    private SwipeRefreshLayout refreshLayout;
+   private String requestId;
 
    @Override protected void onViewCreated() {
+      requestId = getDecorators().getRequestId();
       refreshLayout = (SwipeRefreshLayout) getDecorated().findViewById(R.id.refresh);
       refreshLayout.setEnabled(true);
    }
 
    @Override protected void onStart() {
-      Deco.RequestInstigator d = getDecorators().getFirstDecoratorOfType(Deco.RequestInstigator.class);
-      if (EyeEm.requests().isExecuting(d.getRequestId())) {
-         EyeEm.requests().addListener(this, d.getRequestId());
+      if (EyeEm.requests().isExecuting(requestId)) {
+         EyeEm.requests().addListener(this, requestId);
          refreshLayout.setRefreshing(true);
       } else {
          refreshLayout.setRefreshing(false);
@@ -40,9 +41,8 @@ public class SwipeToRefreshDecorator extends Deco implements SwipeRefreshLayout.
    }
 
    @Override public void onRefresh() {
-      Deco.RequestInstigator d = getDecorators().getFirstDecoratorOfType(Deco.RequestInstigator.class);
-      EyeEm.requests().addListener(this, d.getRequestId());
-      d.reload();
+      EyeEm.requests().addListener(this, requestId);
+      getDecorators().reload();
    }
 
    @Override public void onRequestFinished(boolean success, int offset) {
