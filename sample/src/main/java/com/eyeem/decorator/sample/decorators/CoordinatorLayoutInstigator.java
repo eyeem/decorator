@@ -26,11 +26,11 @@ public class CoordinatorLayoutInstigator extends Deco implements Deco.InstigateG
 
    @Override protected void onViewInflated() {
       ButterKnife.bind(this, getDecorated());
-      Deco.HeaderInstigator h = getDecorators().getFirstDecoratorOfType(Deco.HeaderInstigator.class);
-      if (h != null) {
+      int headerId = getDecorators().getHeaderId();
+      if (headerId > 0) {
          LayoutInflater inflater = LayoutInflater.from(getDecorated());
-         inflater.inflate(h.getHeaderId(), collapsing, true);
-         h.onHeaderCreated(collapsing);
+         inflater.inflate(headerId, collapsing, true);
+         getDecorators().onHeaderCreated(collapsing);
       }
    }
 
