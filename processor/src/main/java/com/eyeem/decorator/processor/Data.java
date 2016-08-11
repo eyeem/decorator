@@ -95,6 +95,10 @@ public class Data {
       }
 
       public boolean returnsVoid() {
+         return returnsVoid(returnType);
+      }
+
+      public static boolean returnsVoid(TypeMirror returnType) {
          return (returnType instanceof NoType && returnType.getKind() == TypeKind.VOID);
       }
 

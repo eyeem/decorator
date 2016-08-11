@@ -1,6 +1,7 @@
 package com.eyeem.decorator.sample.blueprint;
 
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -61,7 +62,7 @@ public class ActivityBlueprint extends AppCompatActivity {
 
    }
 
-   public int getLayoutId() {
+   @LayoutRes public int getLayoutId() {
       return R.layout.recycler_view;
    }
 

@@ -2,7 +2,6 @@ package com.eyeem.decorator.processor;
 
 import com.eyeem.decorator.base_classes.AbstractDecorators;
 import com.eyeem.decorator.exception.DecoratorNotFoundException;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.ElementFilter;
@@ -158,14 +156,14 @@ public class GeneratorDecorated implements Generator {
 
 
    private MethodSpec getVoidMethod(Data.MethodData m) {
-      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+      return buildEmptyMethod(m, true)
             .addStatement("decorators.$L($L)",
                   m._method.getSimpleName(),
                   getCommaSeparatedParams(m, buffer)).build();
    }
 
    private MethodSpec getBooleanMethod(Data.MethodData m) {
-      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+      return buildEmptyMethod(m, true)
             .addStatement("return decorators.$L($L)",
                   m._method.getSimpleName(),
                   getCommaSeparatedParams(m, buffer)).build();
@@ -182,7 +180,7 @@ public class GeneratorDecorated implements Generator {
             .add(MethodBodyReader.getMethodBody(processingEnv, m))
             .add("//endregion\n")
             .endControlFlow();
-      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+      return buildEmptyMethod(m, true)
             .addCode(code.build())
             .build();
    }
@@ -200,21 +198,9 @@ public class GeneratorDecorated implements Generator {
             .add(MethodBodyReader.getMethodBody(processingEnv, m))
             .add("//endregion\n")
             .endControlFlow();
-      return addOverrideIfNecessary(buildEmptyMethod(m), m)
+      return buildEmptyMethod(m, true)
             .addCode(code.build())
             .build();
-   }
-
-   private MethodSpec.Builder addOverrideIfNecessary(MethodSpec.Builder builder, Data.MethodData methodData) {
-      for (AnnotationMirror a : methodData._method.getAnnotationMirrors()) {
-         if ("@java.lang.Override".equals(a.toString())) {
-            builder.addAnnotation(AnnotationSpec.builder(Override.class).build());
-            if (methodData.returnsVoid()) {
-               builder.addStatement("super.$L($L)", methodData._method.getSimpleName(), getCommaSeparatedParams(methodData, buffer));
-            }
-         }
-      }
-      return builder;
    }
 
    private static class MethodBodyReader extends TreePathScanner<Object, Trees> {
