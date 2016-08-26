@@ -62,19 +62,19 @@ public class GeneratorUtils {
    }
 
    public static MethodSpec.Builder buildEmptyConstructor(ExecutableElement method) {
-      return buildEmptyMethod(method, null, true, false);
+      return buildEmptyMethod(method, null, true, false, false);
    }
 
-   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData, Iterable<Modifier> modifiers) {
-      return buildEmptyMethod(methodData._method, modifiers, false, false);
+   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData, Iterable<Modifier> modifiers, boolean withOverride) {
+      return buildEmptyMethod(methodData._method, modifiers, false, false, withOverride);
    }
 
-   public static MethodSpec.Builder buildEmptyMethodWithGenericCasting(Data.MethodData methodData, Iterable<Modifier> modifiers) {
-      return buildEmptyMethod(methodData._method, modifiers, false, true);
+   public static MethodSpec.Builder buildEmptyMethodWithGenericCasting(Data.MethodData methodData, Iterable<Modifier> modifiers, boolean withOverride) {
+      return buildEmptyMethod(methodData._method, modifiers, false, true, withOverride);
    }
 
-   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData) {
-      return buildEmptyMethod(methodData._method, null, false, false);
+   public static MethodSpec.Builder buildEmptyMethod(Data.MethodData methodData, boolean withOverride) {
+      return buildEmptyMethod(methodData._method, null, false, false, withOverride);
    }
 
    /**
@@ -86,7 +86,7 @@ public class GeneratorUtils {
     * @param isConstructor
     * @return
     */
-   private static MethodSpec.Builder buildEmptyMethod(ExecutableElement method, Iterable<Modifier> modifiers, boolean isConstructor, boolean addGenericCasting) {
+   private static MethodSpec.Builder buildEmptyMethod(ExecutableElement method, Iterable<Modifier> modifiers, boolean isConstructor, boolean addGenericCasting, boolean withOverride) {
 
       if (modifiers == null) {
          modifiers = getModifiers(method);
@@ -95,6 +95,21 @@ public class GeneratorUtils {
       String methodName = method.getSimpleName().toString();
       MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName);
       methodBuilder.addModifiers(modifiers);
+
+      for (AnnotationMirror am : method.getAnnotationMirrors()) {
+         boolean isOverride = am.toString().equals("@java.lang.Override");
+         boolean isOverrideWithOverride = isOverride && withOverride;
+
+         if (!isOverride ||
+               isOverrideWithOverride) {
+            methodBuilder.addAnnotation(AnnotationSpec.get(am));
+         }
+
+         if (isOverrideWithOverride &&
+               Data.MethodData.returnsVoid(method.getReturnType())) {
+            methodBuilder.addStatement("super.$L($L)", method.getSimpleName(), getCommaSeparatedParams(method, null));
+         }
+      }
 
       for (TypeParameterElement typeParameterElement : method.getTypeParameters()) {
          TypeVariable var = (TypeVariable) typeParameterElement.asType();

@@ -98,12 +98,12 @@ public class GeneratorDecorator implements Generator {
 
          // if `void` just create empty method
          if (m.returnsVoid()) {
-            typeBuilder.addMethod(buildEmptyMethod(m).build());
+            typeBuilder.addMethod(buildEmptyMethod(m, false).build());
          }
 
          // if `boolean` return false
          else if (m.returnsBoolean()) {
-            typeBuilder.addMethod(buildEmptyMethod(m).addStatement("return false").build());
+            typeBuilder.addMethod(buildEmptyMethod(m, false).addStatement("return false").build());
          }
 
          // if `Object` or primitive create interface for it
@@ -111,15 +111,14 @@ public class GeneratorDecorator implements Generator {
             typeBuilder.addType(
                   TypeSpec.interfaceBuilder(getInterfaceName(m))
                         .addModifiers(Modifier.PUBLIC)
-                        .addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT).build())
-                        .build());
+                        .addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT, false).build()).build());
          }
       }
    }
 
    private static void addMethodsToInterfaceBuilder(TypeSpec.Builder typeBuilder, List<Data.MethodData> methods) {
       for (Data.MethodData m : methods) {
-         typeBuilder.addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT).build());
+         typeBuilder.addMethod(buildEmptyMethod(m, PUBLIC_ABSTRACT, false).build());
       }
    }
 }

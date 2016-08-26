@@ -138,7 +138,7 @@ public class GeneratorDecorators implements Generator {
             m._method.getSimpleName(),
             getCommaSeparatedParams(m, buffer));
       code.endControlFlow();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethod(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
    private MethodSpec getVoidMethod(Data.MethodData m, Data.InterfaceData i) {
@@ -160,7 +160,7 @@ public class GeneratorDecorators implements Generator {
                   getCommaSeparatedParams(m, buffer))
             .endControlFlow()
             .endControlFlow();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethod(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
 
@@ -175,7 +175,7 @@ public class GeneratorDecorators implements Generator {
             .endControlFlow()
             .endControlFlow()
             .addStatement("return false");
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethod(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
    private MethodSpec getBooleanMethod(Data.MethodData m, Data.InterfaceData i) {
@@ -200,7 +200,7 @@ public class GeneratorDecorators implements Generator {
             .endControlFlow()
             .endControlFlow()
             .addStatement("return false");
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethod(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
    private MethodSpec getTypeMethod(Data.MethodData m) {
@@ -231,7 +231,7 @@ public class GeneratorDecorators implements Generator {
          code.addStatement("return $L", returnType);
       }
       code.endControlFlow();
-      return buildEmptyMethod(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethod(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
    private MethodSpec getTypeMethod(Data.MethodData m, Data.InterfaceData i) {
@@ -272,7 +272,7 @@ public class GeneratorDecorators implements Generator {
          code.endControlFlow();
       }
 
-      return buildEmptyMethodWithGenericCasting(m, PUBLIC_FINAL).addCode(code.build()).build();
+      return buildEmptyMethodWithGenericCasting(m, PUBLIC_FINAL, false).addCode(code.build()).build();
    }
 
    private void addToNonComposableList(String klazz) {
