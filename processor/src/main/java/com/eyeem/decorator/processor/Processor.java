@@ -30,11 +30,12 @@ public class Processor extends AbstractProcessor implements Log {
    @Override
    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
-      i("@Decorate starting for " + annotations.size() + " element");
 
       if (annotations.size() == 0) {
          return false;
       }
+      
+      i("@Decorate starting for " + annotations.size() + " element");
 
       long initialTime = System.currentTimeMillis();
       HashMap<String, Data> results;
