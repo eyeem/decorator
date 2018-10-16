@@ -49,7 +49,7 @@ public class GeneratorDecorator implements Generator {
       // add getDecorators()
       String decoratorsSimpleName = GeneratorDecorators.getClassName(def);
       MethodSpec.Builder getDecorator = MethodSpec.methodBuilder("getDecorators")
-            .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .returns(ClassName.get(def.getPackageName(), decoratorsSimpleName))
             .addStatement("return ($L)decorators", decoratorsSimpleName);
       decoratorClassBuilder.addMethod(getDecorator.build());
